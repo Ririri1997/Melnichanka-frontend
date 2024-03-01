@@ -20,7 +20,7 @@ function Registration() {
   useEffect(() => {
     const fetchPositions = async () =>{
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/positions/');
+        const response = await axios.get('http://127.0.0.1:8000/api/v1/users/positions/');
         setPositions(response.data);
       } catch (error){
         console.error('Ошибка при получении списка позиций: ', error)
@@ -33,7 +33,7 @@ function Registration() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/departments/');
+        const response = await axios.get('http://127.0.0.1:8000/api/v1/users/departments/');
         setDepartments(response.data);
       } catch (error) {
         console.error('Ошибка при получении списка департаментов:', error);
@@ -116,16 +116,14 @@ const handleEmailValid = (email) => {
     formData.forEach((value, key) => {
     formDataObject[key] = value;
   });
-  console.log(formDataObject);
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/registration/', formData);
+    const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', formData);
     console.log(response.data);
   } catch (error) {
     console.error('Error sending data to backend:', error);
     setServerErrors(error.response.data);
   }
 }
-console.log(localErrors, serverErrors)
   return (
     <StyledRegistration>
       <CardForm title="Регистрация">
