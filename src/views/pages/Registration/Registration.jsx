@@ -13,8 +13,7 @@ function Registration() {
   const [positions, setPositions] = useState([]);
   const [changeDepartment, setСhangeDepartment] = useState('');
   const [changePosition, setСhangePosition] = useState('');
-  const [localErrors, setLocalErrors] = useState({
-  });
+  const [localErrors, setLocalErrors] = useState({});
   const [serverErrors, setServerErrors] = useState({});
 // Получаем позиции 
   useEffect(() => {

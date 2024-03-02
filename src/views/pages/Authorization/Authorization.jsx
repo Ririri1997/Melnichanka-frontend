@@ -18,20 +18,26 @@ function Authorization() {
 
 useEffect( () =>{
   getSession();
+}, []);
 
-}, [])
-const getSession = () => {
-  fetch('http://127.0.0.1:8000/api/v1/users/session/', {
-    credentials: "same-origin",
-  }).then((res) =>  res.json())
-  .then((data) => {
-    console.log(data);
-    setIsAuthenticated(data.isAuthenticated);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+
+const getSession = async () => {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/api/v1/users/session/', {
+      credentials: "include",
+    })
+    if (response.ok) {
+      const data = await response.json();
+      setIsAuthenticated(data.isAuthenticated);
+      console.log(data)
+    } else {
+      console.log('Failed to get session:', response.status);
+    }
+  } catch (error) {
+    console.error('Error getting session:', error);
+  }
 }
+
 
 const login = async (event) => {
   event.preventDefault();
@@ -42,18 +48,20 @@ const login = async (event) => {
         'Content-Type': 'application/json',
         'X-CSRFToken': cookies.get('csrftoken'),
       },
-      credentials: 'same-origin',
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
-    
+    console.log(response)
+
     if (response.ok) {
       setIsAuthenticated(true);
       setServerErrors({});
+      console.log(response);
     } else {
       const errorData = await response.json();
-      setServerErrors(errorData);
+      setServerErrors({ error: errorData.detail });
       setIsAuthenticated(false);
-      console.log(errorData)
+      console.log(errorData);
     }
   } catch (error) {
     console.error('Error logging in:', error);
@@ -63,7 +71,34 @@ const login = async (event) => {
 };
 
 
-
+const logout = async (event) => {
+ event.preventDefault();
+ try {
+   const response = await fetch('http://127.0.0.1:8000/api/v1/users/logout/', {
+     method: 'POST',
+     headers: {
+       'Content-Type': 'application/json'
+     },
+     credentials: 'include'
+   });
+   
+   if (response.ok) {
+     cookies.remove('isAuthenticated');
+     setIsAuthenticated(false);
+     setServerErrors({});
+   } else {
+     const errorData = await response.json();
+     console.log(errorData);
+     cookies.remove('isAuthenticated');
+     setServerErrors({});
+     setIsAuthenticated(false);
+   }
+ } catch (error) {
+   console.error('Error logout:', error);
+   setServerErrors({});
+   setIsAuthenticated(true);
+ }
+};
 const handlePasswordChange = (event) => {
   setPassword(event.target.value);
 }
@@ -71,6 +106,7 @@ const handlePasswordChange = (event) => {
 const handleUserEmailChange = (event) => {
   setEmail(event.target.value);
 }
+
 
 if(!isAuthenticated){
   return (
@@ -84,8 +120,6 @@ if(!isAuthenticated){
             label="Логин" 
             placeholder="email" 
             name="email"
-            error={!!serverErrors.login}
-            helperText={serverErrors.login || ''}
             onChange={handleUserEmailChange}
           />
           <TextField 
@@ -95,8 +129,8 @@ if(!isAuthenticated){
             placeholder="password" 
             type="password" 
             name='password'
-            error={!!serverErrors.password}
-            helperText={serverErrors.password || ''}
+            error={!!serverErrors.error}
+            helperText={serverErrors.error || ''}
             onChange={handlePasswordChange}
           />
           <Button variant="contained" type="submit">Войти</Button>
@@ -108,7 +142,7 @@ if(!isAuthenticated){
   return (
   <StyledAuthorization>
     <CardForm title='Вы авторизованы'>
-    
+    <Button onClick={logout} variant="contained" type="submit">Выйти </Button>
     </CardForm>
   </StyledAuthorization>
   );
@@ -116,4 +150,3 @@ if(!isAuthenticated){
 }
 
 export default Authorization;
-
