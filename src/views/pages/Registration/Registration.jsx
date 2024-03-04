@@ -1,11 +1,12 @@
 import StyledRegistration from "./Registration.styles";
 import CardForm from "../../../components/CardForm/CardForm";
 import Form from "../../../components/Form/Form";
-import { FormControl, InputLabel, Select, MenuItem, TextField } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, TextField, FormHelperText } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import axios from 'axios';
 import InputMask from 'react-input-mask';
+import { handleTel, handleEmptyField, handleFullName, handlePasswordMatch, handlePasswordValid, handleEmailValid } from '../../../utils/formValidations';
 
 
 function Registration() {
@@ -15,6 +16,7 @@ function Registration() {
   const [changePosition, setСhangePosition] = useState('');
   const [localErrors, setLocalErrors] = useState({});
   const [serverErrors, setServerErrors] = useState({});
+  const [success, setSuccess] = useState(false);
 // Получаем позиции 
   useEffect(() => {
     const fetchPositions = async () =>{
@@ -48,63 +50,36 @@ function Registration() {
     setСhangePosition(e.target.value);
   }
     
-
-const handleTel = (value, name) => {
-  const errorText = value.length < 12 ? "Введите номер телефона" : false;
-  setLocalErrors(prevErrors => ({ ...prevErrors, [name]: errorText }));
-  return !errorText; 
-}
-const handleEmptyField = (value, name) => {
-  const errorText = value.length === 0 ? "Это поле обязательно к заполнению" : false;
-  setLocalErrors(prevErrors => ({ ...prevErrors, [name]: errorText }));
-  return !errorText; 
-}
-const handleName = (nameValue) => {
-  let fullName = nameValue.trim().replace(/\s+/g, ' ');
-  const errorText = fullName.split(' ').length !== 3 ? 'Введите полное имя' : false;
-  setLocalErrors(prevErrors => ({ ...prevErrors, full_name: errorText }));
-  return !errorText;
-}
-
-const handlepasswordMatch = (passwordOne, passwordTwo) =>{
-  const errorText = passwordOne !== passwordTwo ? 'Пароли не совпадают' : false;
-  setLocalErrors(prevErrors => ({ ...prevErrors, password_confirm: errorText }));
-
-}
-const handlepasswordValid = (password) => {
-  let errorText = '';
-
-  if (password.length < 8) {
-    errorText = 'Пароль должен содержать минимум 8 символов';
-  } else if (!/\d/.test(password)) {
-    errorText = 'Пароль должен содержать хотя бы одну цифру';
-  } else if (!/[a-zA-Zа-яА-Я]/.test(password)) {
-    errorText = 'Пароль должен содержать хотя бы одну букву';
-  } else {
-    errorText = false; 
-  }
-
-  setLocalErrors(prevErrors => ({ ...prevErrors, password: errorText }));
-}
-
-const handleEmailValid = (email) => {
-  const errorText = !email.includes('@') ? 'Поле должно содержать знак @' : false;
-  setLocalErrors(prevErrors => ({ ...prevErrors, email: errorText }));
-
-}
-
   // Функция для обработки отправки формы
  const handleFormSubmit = async (event) => {
   event.preventDefault();
  // проверка на валидность фио
-  const isValidName = handleName(event.target.full_name.value);
+ 
+  const isValidName = handleFullName(event.target.full_name.value);
+  setLocalErrors(prevErrors => ({ ...prevErrors, full_name: isValidName }));
+
   const isValidPersonalTel = handleTel(event.target.phone_number_personal.value, 'phone_number_personal');
+  setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_personal: isValidPersonalTel }));
+
   const isValidWorkTel = handleTel(event.target.phone_number_work.value, 'phone_number_work');
-  const isValidEmptyEmail = handleEmptyField(event.target.email.value, 'email');
+  setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_work: isValidWorkTel }));
+  
+  const isDepartmentValid = handleEmptyField(changeDepartment);
+  setLocalErrors(prevErrors => ({ ...prevErrors, department: isDepartmentValid }));
+
+  const isPositionValid = handleEmptyField(changePosition);
+  setLocalErrors(prevErrors => ({ ...prevErrors, position: isPositionValid }));
+
   const isValidEmail = handleEmailValid(event.target.email.value);
-  const isPasswordMatch = handlepasswordMatch(event.target.password.value, event.target.password_confirm.value);
-  const isPasswordValid = handlepasswordValid(event.target.password.value);
-  if (!isValidName && !isValidPersonalTel && !isValidWorkTel && !isValidEmptyEmail && !isValidEmail && !isPasswordMatch && !isPasswordValid) {
+  setLocalErrors(prevErrors => ({ ...prevErrors, email: isValidEmail }));
+
+  const isPasswordMatch = handlePasswordMatch(event.target.password.value, event.target.password_confirm.value);
+  setLocalErrors(prevErrors => ({ ...prevErrors, password_confirm: isPasswordMatch }));
+
+  const isPasswordValid = handlePasswordValid(event.target.password.value);
+  setLocalErrors(prevErrors => ({ ...prevErrors, password: isPasswordValid }));
+console.log(localErrors)
+  if (!isValidName && !isValidPersonalTel && !isValidWorkTel && !isDepartmentValid && !isPositionValid && !isValidEmail && !isPasswordMatch && !isPasswordValid) {
     return; 
   }
   const formData = new FormData(event.target);
@@ -116,8 +91,10 @@ const handleEmailValid = (email) => {
     formDataObject[key] = value;
   });
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', formData);
-    console.log(response.data);
+    // const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', formData);
+    // console.log(response.data);
+    setSuccess(true)
+    console.log("Отправила")
   } catch (error) {
     console.error('Error sending data to backend:', error);
     setServerErrors(error.response.data);
@@ -163,7 +140,8 @@ const handleEmailValid = (email) => {
             </InputMask>
           </div>
           
-          <FormControl variant="outlined" fullWidth>
+          <FormControl variant="outlined" fullWidth 
+              error={!!localErrors.position}>
             <InputLabel id="position">Позиция</InputLabel>
             <Select
               labelId="position"
@@ -171,13 +149,19 @@ const handleEmailValid = (email) => {
               label="Позиция"
               onChange={handlePosition}
               value={changePosition} 
-            > 
+              required
+              > 
               {positions.map((item, i) => (
                 <MenuItem value={item.id} key={i}>{item.position}</MenuItem>
               ))}
             </Select>
-          </FormControl>
-          <FormControl variant="outlined" fullWidth>
+              {!!localErrors.position && (
+                <FormHelperText>{localErrors.position}</FormHelperText>
+              )}
+            </FormControl>
+          <FormControl variant="outlined" fullWidth
+          
+          error={!!localErrors.department}>
             <InputLabel id="department">Департамент</InputLabel>
             <Select
               labelId="department"
@@ -190,6 +174,9 @@ const handleEmailValid = (email) => {
                 <MenuItem value={item.id} key={i}>{item.department}</MenuItem>
               ))}
             </Select>
+            {!!localErrors.department && (
+             <FormHelperText>{localErrors.department}</FormHelperText>
+            )}
           </FormControl> 
 
           <TextField 
@@ -222,7 +209,7 @@ const handleEmailValid = (email) => {
             error = {!!localErrors.password_confirm || !!serverErrors.non_field_errors}
             helperText={localErrors.password_confirm || serverErrors.non_field_errors || ''}
           />
-          <Button variant="contained" type="submit">Зарегистироваться</Button>
+          <Button variant="contained" type="submit">{success? 'Вы зарегистрированы' :'Зарегистироваться'}</Button>
         </Form>
       </CardForm>
     </StyledRegistration>

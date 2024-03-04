@@ -5,8 +5,10 @@ const theme = createTheme({
     primary: {
       main: '#58C256',
       dark: '#43B441',
-      contrastText: '#fff',
-      // light: 'red'
+      contrastText: '#fff'
+    },
+    error: {
+      main: '#d32f2f', // Цвет ошибки
     },
   },
   shape: {
@@ -56,7 +58,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           marginLeft: 0, // Убираем левый отступ
-          color: 'red', // Устанавливаем цвет текста ошибки
+          color: '#d32f2f', // Устанавливаем цвет текста ошибки
         },
       },
     },
