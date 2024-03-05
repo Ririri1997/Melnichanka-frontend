@@ -1,15 +1,17 @@
 
 import {useEffect} from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const Logout = () => {
  let localStorageTokenRefresh = localStorage.getItem('refresh_token');
+ const navigate = useNavigate();
 
  console.log(localStorageTokenRefresh)
     useEffect(() => {
         (async () => {
             try {
-                const {data} = await axios.post('http://127.0.0.1:8000/api/v1/users/logout/',{
+                await axios.post('http://127.0.0.1:8000/api/v1/users/logout/',{
                 refresh_token: localStorageTokenRefresh
                 } ,{headers: {
                     'Content-Type': 'application/json',
@@ -18,15 +20,14 @@ export const Logout = () => {
 
                 }}, {withCredentials: true});
 
-                console.log('logout', data)
                 localStorage.clear();
                 axios.defaults.headers.common['Authorization'] = null;
-                window.location.href = '/login'
+                navigate( '/login'); 
             } catch (e) {
                 console.log('logout not working', e)
             }
         })();
-    }, []);
+    }, [navigate, localStorageTokenRefresh]);
 
     return (
         <div></div>

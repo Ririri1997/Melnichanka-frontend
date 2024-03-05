@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
-
 import CardForm from '../../../components/CardForm/CardForm';
 import Button from "@mui/material/Button";
+import {useNavigate } from 'react-router-dom'
+
+
 export const Home = () => {
   const [message, setMessage] = useState('');
 
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
         const accessToken = localStorage.getItem('access_token');
         if (!accessToken) {
-          window.location.href = '/login'; // Перенаправить пользователя на страницу входа, если токен доступа отсутствует
+          navigate( '/login'); 
           return;
         }
 
@@ -28,13 +29,13 @@ export const Home = () => {
       } catch (error) {
         console.error('Error fetching home data:', error);
         if (error.response && error.response.status === 401) {
-          window.location.href = '/login'; // Перенаправить пользователя на страницу входа в случае ошибки 401 Unauthorized
+          navigate( '/login'); 
         }
       }
     };
 
     fetchHomeData();
-  }, []);
+  }, [navigate]);
 
   return (
     <CardForm title={`Hi ${message}`}>

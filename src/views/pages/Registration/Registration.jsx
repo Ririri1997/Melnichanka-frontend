@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import axios from 'axios';
 import InputMask from 'react-input-mask';
 import { handleTel, handleEmptyField, handleFullName, handlePasswordMatch, handlePasswordValid, handleEmailValid } from '../../../utils/formValidations';
+import { useNavigate } from "react-router-dom";
 
 
 function Registration() {
@@ -16,7 +17,7 @@ function Registration() {
   const [changePosition, setСhangePosition] = useState('');
   const [localErrors, setLocalErrors] = useState({});
   const [serverErrors, setServerErrors] = useState({});
-  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate()
 // Получаем позиции 
   useEffect(() => {
     const fetchPositions = async () =>{
@@ -53,8 +54,6 @@ function Registration() {
   // Функция для обработки отправки формы
  const handleFormSubmit = async (event) => {
   event.preventDefault();
- // проверка на валидность фио
- 
   const isValidName = handleFullName(event.target.full_name.value);
   setLocalErrors(prevErrors => ({ ...prevErrors, full_name: isValidName }));
 
@@ -78,8 +77,8 @@ function Registration() {
 
   const isPasswordValid = handlePasswordValid(event.target.password.value);
   setLocalErrors(prevErrors => ({ ...prevErrors, password: isPasswordValid }));
-console.log(localErrors)
-  if (!isValidName && !isValidPersonalTel && !isValidWorkTel && !isDepartmentValid && !isPositionValid && !isValidEmail && !isPasswordMatch && !isPasswordValid) {
+  
+  if (isValidName || isValidPersonalTel || isValidWorkTel || isDepartmentValid || isPositionValid || isValidEmail || isPasswordMatch || isPasswordValid) {
     return; 
   }
   const formData = new FormData(event.target);
@@ -90,11 +89,16 @@ console.log(localErrors)
     formData.forEach((value, key) => {
     formDataObject[key] = value;
   });
+  console.log(formData)
+  console.log(formDataObject)
+
   try {
-    // const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', formData);
-    // console.log(response.data);
-    setSuccess(true)
-    console.log("Отправила")
+    const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', formData);
+    console.log(response.data);
+    navigate( '/login'); 
+    event.target.reset(); 
+
+
   } catch (error) {
     console.error('Error sending data to backend:', error);
     setServerErrors(error.response.data);
@@ -209,7 +213,7 @@ console.log(localErrors)
             error = {!!localErrors.password_confirm || !!serverErrors.non_field_errors}
             helperText={localErrors.password_confirm || serverErrors.non_field_errors || ''}
           />
-          <Button variant="contained" type="submit">{success? 'Вы зарегистрированы' :'Зарегистироваться'}</Button>
+          <Button variant="contained" type="submit">Зарегистироваться</Button>
         </Form>
       </CardForm>
     </StyledRegistration>

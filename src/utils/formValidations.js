@@ -1,8 +1,8 @@
 export const handleTel = (value) => {
- const errorText = value.length < 12 ? "Введите номер телефона" : false;
- return errorText; 
+  const trimmedValue = value.replace(/\s+/g, '');
+  const errorText = trimmedValue.length < 12 ? "Введите корректный номер телефона" : false;
+  return errorText; 
 }
-
 export const handleEmptyField = (value) => {
  const errorText = value.length === 0 ? "Это поле обязательно к заполнению" : false;
  return errorText; 
