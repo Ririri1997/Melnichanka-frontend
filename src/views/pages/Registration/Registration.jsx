@@ -17,7 +17,8 @@ function Registration() {
   const [changePosition, setСhangePosition] = useState('');
   const [localErrors, setLocalErrors] = useState({});
   const [serverErrors, setServerErrors] = useState({});
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
 // Получаем позиции 
   useEffect(() => {
     const fetchPositions = async () =>{
@@ -95,7 +96,28 @@ function Registration() {
   try {
     const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', formData);
     console.log(response.data);
-    navigate( '/login'); 
+    try{      
+      const user = {
+        email: event.target.email.value,
+        password: event.target.password.value
+      }
+      const {data} = await axios.post('http://127.0.0.1:8000/api/v1/users/login/', user ,{
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }, {
+        withCredentials: true
+      });
+      localStorage.clear();
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
+    }
+    catch (error){
+      console.error('An error occurred while logging in:', error);
+      setServerErrors({ error: error.response.data.detail })
+    }
+    navigate( '/', { replace: true }); 
     event.target.reset(); 
 
 

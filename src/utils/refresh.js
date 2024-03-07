@@ -14,7 +14,7 @@ axios.interceptors.response.use(
         try {
           const response = await axios.post(
             'http://127.0.0.1:8000/api/v1/users/token/refresh/',
-            { refresh: refreshToken }, // попробовать сделать json 
+            { refresh: refreshToken },
             {
               headers: {
                 'Content-Type': 'application/json',

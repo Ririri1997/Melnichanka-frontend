@@ -17,6 +17,7 @@ const Login = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  console.log(location)
 
   const fromPage = location.state?.from?.pathname || '/'
 
@@ -50,8 +51,7 @@ const Login = () => {
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
       axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
-      navigate(fromPage, {replace: true})
-      
+      navigate(fromPage, { replace: true });
     }
     catch (error){
       console.error('An error occurred while logging in:', error);
