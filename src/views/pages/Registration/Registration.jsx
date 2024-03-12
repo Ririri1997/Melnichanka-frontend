@@ -2,24 +2,31 @@ import StyledRegistration from "./Registration.styles";
 import CardForm from "../../../components/CardForm/CardForm";
 import Form from "../../../components/Form/Form";
 import { FormControl, InputLabel, Select, MenuItem, TextField, FormHelperText } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useReducer } from "react";
 import Button from "@mui/material/Button";
 import axios from 'axios';
 import InputMask from 'react-input-mask';
-import { handleTel, handleEmptyField, handleFullName, handlePasswordMatch, handlePasswordValid, handleEmailValid } from '../../../utils/formValidations';
 import { useNavigate } from "react-router-dom";
-
+import {formReducer, INITIAL_STATE } from './Registration.state';
 
 function Registration() {
+  const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
+	const {isValidText, values, isFormReadyToSubmit} = formState;
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
-  const [changeDepartment, setСhangeDepartment] = useState('');
-  const [changePosition, setСhangePosition] = useState('');
   const [localErrors, setLocalErrors] = useState({});
   const [serverErrors, setServerErrors] = useState({});
   const navigate = useNavigate();
 
-// Получаем позиции 
+  useEffect(() => {
+    dispatchForm({type: 'SUBMIT', values});
+  }, []); 
+
+  const onChange = (name, value) => {
+    dispatchForm({type: 'SET_VALUE', payload: { [name]: value }});
+    dispatchForm({type: 'SUBMIT', values: { ...values, [name]: value }});
+  };
+  
   useEffect(() => {
     const fetchPositions = async () =>{
       try {
@@ -32,7 +39,6 @@ function Registration() {
     fetchPositions();
   }, []);
 
-// получаем департаменты
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
@@ -44,58 +50,25 @@ function Registration() {
     };
     fetchDepartments();
   }, []);
-
-  const handleDepartment = (e)=>{
-    setСhangeDepartment(e.target.value);
-  }
-  const handlePosition = (e)=>{
-    setСhangePosition(e.target.value);
-  }
     
   // Функция для обработки отправки формы
  const handleFormSubmit = async (event) => {
   event.preventDefault();
-  const isValidName = handleFullName(event.target.full_name.value);
-  setLocalErrors(prevErrors => ({ ...prevErrors, full_name: isValidName }));
-
-  const isValidPersonalTel = handleTel(event.target.phone_number_personal.value, 'phone_number_personal');
-  setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_personal: isValidPersonalTel }));
-
-  const isValidWorkTel = handleTel(event.target.phone_number_work.value, 'phone_number_work');
-  setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_work: isValidWorkTel }));
+  setLocalErrors(prevErrors => ({ ...prevErrors, full_name: isValidText.full_name}));
+  setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_personal: isValidText.phone_number_personal }));
+  setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_work: isValidText.phone_number_work }));
+  setLocalErrors(prevErrors => ({ ...prevErrors, department: isValidText.department }));
+  setLocalErrors(prevErrors => ({ ...prevErrors, position: isValidText.position }));
+  setLocalErrors(prevErrors => ({ ...prevErrors, email: isValidText.email }));
+  setLocalErrors(prevErrors => ({ ...prevErrors, password_confirm: isValidText.password_confirm }));
+  setLocalErrors(prevErrors => ({ ...prevErrors, password: isValidText.password }));
   
-  const isDepartmentValid = handleEmptyField(changeDepartment);
-  setLocalErrors(prevErrors => ({ ...prevErrors, department: isDepartmentValid }));
-
-  const isPositionValid = handleEmptyField(changePosition);
-  setLocalErrors(prevErrors => ({ ...prevErrors, position: isPositionValid }));
-
-  const isValidEmail = handleEmailValid(event.target.email.value);
-  setLocalErrors(prevErrors => ({ ...prevErrors, email: isValidEmail }));
-
-  const isPasswordMatch = handlePasswordMatch(event.target.password.value, event.target.password_confirm.value);
-  setLocalErrors(prevErrors => ({ ...prevErrors, password_confirm: isPasswordMatch }));
-
-  const isPasswordValid = handlePasswordValid(event.target.password.value);
-  setLocalErrors(prevErrors => ({ ...prevErrors, password: isPasswordValid }));
-  
-  if (isValidName || isValidPersonalTel || isValidWorkTel || isDepartmentValid || isPositionValid || isValidEmail || isPasswordMatch || isPasswordValid) {
+  if (!isFormReadyToSubmit) {
     return; 
   }
-  const formData = new FormData(event.target);
-  formData.append('department', changeDepartment);
-  formData.append('position', changePosition);
-
-  const formDataObject = {};
-    formData.forEach((value, key) => {
-    formDataObject[key] = value;
-  });
-  console.log(formData)
-  console.log(formDataObject)
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', formData);
-    console.log(response.data);
+    const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', values);
     try{      
       const user = {
         email: event.target.email.value,
@@ -114,33 +87,37 @@ function Registration() {
       axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
     }
     catch (error){
-      console.error('An error occurred while logging in:', error);
+      // console.error('An error occurred while logging in:', error);
       setServerErrors({ error: error.response.data.detail })
     }
     navigate( '/', { replace: true }); 
     event.target.reset(); 
-
-
   } catch (error) {
-    console.error('Error sending data to backend:', error);
+    // console.error('Error sending data to backend:', error);
     setServerErrors(error.response.data);
   }
 }
-  return (
+return (
     <StyledRegistration>
       <CardForm title="Регистрация">
-        <Form onFormSubmit={handleFormSubmit} >
+        <Form onFormSubmit={(e) => {handleFormSubmit(e)}} >
           <TextField
             variant="outlined"
             id="full_name"
             placeholder="Иванов Иван Иванович"
             label="Введите ваше ФИО"
             name="full_name"
+            onChange={(e) => onChange(e.target.name, e.target.value)} 
             error={!!localErrors.full_name}
             helperText={localErrors.full_name || ''}
           />
           <div className="registration-group">
-            <InputMask mask="+79999999999" maskChar=" " defaultValue="" onChange={() => {}}>
+            <InputMask
+             value={values.phone_number_personal}
+             mask="+79999999999" 
+             maskChar=" " 
+             defaultValue="" 
+             onChange={(e) => onChange(e.target.name, e.target.value)} >
             {() =>
             <TextField 
               variant="outlined" 
@@ -152,29 +129,33 @@ function Registration() {
               helperText={localErrors.phone_number_personal  || serverErrors.phone_number_personal || ''}
             />}
             </InputMask>
-            <InputMask mask="+79999999999" maskChar=" " defaultValue="" onChange={() => {}}>
+            <InputMask 
+              value={values.phone_number_work}
+              mask="+79999999999" 
+              maskChar=" " 
+              defaultValue="" 
+              onChange={(e) => onChange(e.target.name, e.target.value)} >
             {() =>
              <TextField 
               variant="outlined" 
               id="work-tel" 
               label="Рабочий телефон" 
               type="tel" 
-              name='phone_number_work'  
+              name='phone_number_work'
               error={!!localErrors.phone_number_work  || !!serverErrors.phone_number_work}
               helperText={localErrors.phone_number_work  || serverErrors.phone_number_work || ''}
             />}
             </InputMask>
           </div>
           
-          <FormControl variant="outlined" fullWidth 
-              error={!!localErrors.position}>
+          <FormControl variant="outlined" fullWidth error={!!localErrors.position}>
             <InputLabel id="position">Позиция</InputLabel>
             <Select
               labelId="position"
               id="demo-simple-select"
               label="Позиция"
-              onChange={handlePosition}
-              value={changePosition} 
+              onChange={(e) => onChange('position', e.target.value)}
+              value={values.position}
               required
               > 
               {positions.map((item, i) => (
@@ -185,16 +166,14 @@ function Registration() {
                 <FormHelperText>{localErrors.position}</FormHelperText>
               )}
             </FormControl>
-          <FormControl variant="outlined" fullWidth
-          
-          error={!!localErrors.department}>
+          <FormControl variant="outlined" fullWidth error={!!localErrors.department}>
             <InputLabel id="department">Департамент</InputLabel>
             <Select
               labelId="department"
               id="demo-simple-select"
               label="Департамент"
-              onChange={handleDepartment}
-              value={changeDepartment} 
+              onChange={(e) => onChange('department', e.target.value)}
+              value={values.department} 
             > 
               {departments.map((item, i) => (
                 <MenuItem value={item.id} key={i}>{item.department}</MenuItem>
@@ -212,6 +191,7 @@ function Registration() {
             placeholder="example@domain.ru" 
             type="email" 
             name="email"
+            onChange={(e) => onChange(e.target.name, e.target.value)} 
             error={!!localErrors.email || !!serverErrors.email}
             helperText={localErrors.email  || serverErrors.email || ''}
           />
@@ -222,6 +202,7 @@ function Registration() {
             placeholder="password" 
             type="password" 
             name='password'
+            onChange={(e) => onChange(e.target.name, e.target.value)} 
             error={!!localErrors.password || !!serverErrors.password}
             helperText={localErrors.password || serverErrors.password || ''}
           />
@@ -232,6 +213,7 @@ function Registration() {
             placeholder="password" 
             type="password" 
             name='password_confirm'
+            onChange={(e) => onChange(e.target.name, e.target.value)} 
             error = {!!localErrors.password_confirm || !!serverErrors.non_field_errors}
             helperText={localErrors.password_confirm || serverErrors.non_field_errors || ''}
           />

@@ -1,46 +1,52 @@
 import axios from "axios";
-import {useState} from "react";
+import {useState, useReducer, useEffect} from "react";
 import StyledLogin  from "./Login.styles";
 import CardForm from '../../../components/CardForm/CardForm';
 import Form from '../../../components/Form/Form';
 import {TextField } from "@mui/material";
 import Button from "@mui/material/Button";
-import {handleEmailValid,  handlePasswordValid} from '../../../utils/formValidations';
 import {useLocation, useNavigate } from 'react-router-dom'
+import {formReducer, INITIAL_STATE } from './Login.state';
 
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
+	const {isValidText, values, isFormReadyToSubmit} = formState;
   const [serverErrors, setServerErrors] = useState({});
   const [localErrors, setLocalErrors] = useState({});
 
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location)
+  useEffect(() => { // Вызываем валидацию при первой загрузке компонента
+    dispatchForm({type: 'SUBMIT', values});
+  }, []); // Пустой массив зависимостей означает, что эффект выполнится только один раз после монтирования
+
 
   const fromPage = location.state?.from?.pathname || '/'
+	
 
+  const onChange =(e) => {
+    dispatchForm({type: 'SET_VALUE', payload: {[e.target.name]: e.target.value}});
+    dispatchForm({type: 'SUBMIT', values: {...values, [e.target.name]: e.target.value}});
+  };
 
-  const submit = async e => {
-    e.preventDefault();
+  const submit = async (e) => {
+    e.preventDefault(); // Предотвращаем дефолтное поведение отправки формы
 
-    const isValidEmail = handleEmailValid(e.target.email.value);
-    setLocalErrors(prevErrors => ({ ...prevErrors, email: isValidEmail }));
-    
-    const isPasswordValid = handlePasswordValid(e.target.password.value);
-    setLocalErrors(prevErrors => ({ ...prevErrors, password: isPasswordValid }));
-    
     const user = {
-      email: email,
-      password: password
+      email: values.email,
+      password: values.password
     };
-     
-    if ( isValidEmail || isPasswordValid) {
-      return; 
+
+    setLocalErrors(prevErrors => ({ ...prevErrors, email: isValidText.email}));
+    setLocalErrors(prevErrors => ({ ...prevErrors, password: isValidText.password}));
+  
+    if (!isFormReadyToSubmit) {
+      return;
     }
-    try{      
-      const {data} = await axios.post('http://127.0.0.1:8000/api/v1/users/login/', user ,{
+  
+    try {
+      const { data } = await axios.post('http://127.0.0.1:8000/api/v1/users/login/', user, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -52,25 +58,24 @@ const Login = () => {
       localStorage.setItem('refresh_token', data.refresh);
       axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
       navigate(fromPage, { replace: true });
-    }
-    catch (error){
-      console.error('An error occurred while logging in:', error);
+    } catch (error) {
+      // console.error('An error occurred while logging in:', error);
       setServerErrors({ error: error.response.data.detail })
     }
-  } 
+  }
 
   return(
     <StyledLogin>
       <CardForm title='Авторизация'>
-        <Form onFormSubmit={submit}>
+        <Form onFormSubmit={(e) => {submit(e)}}>
           <TextField 
             variant="outlined" 
             id="email" 
             label="Логин" 
             placeholder="email" 
             name="email"
-            onChange={e=> setEmail(e.target.value)}
-            error={!!localErrors.email || !!serverErrors.email}
+            onChange={onChange}
+            error={!!localErrors.email|| !!serverErrors.email}
             helperText={localErrors.email  || serverErrors.email || ''}
           
           />
@@ -81,7 +86,7 @@ const Login = () => {
             placeholder="password" 
             type="password" 
             name='password'
-            onChange={e => setPassword(e.target.value)}
+            onChange={onChange}
             error={!!localErrors.password || !!serverErrors.error}
             helperText={localErrors.password || serverErrors.error || ''}
           
