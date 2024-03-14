@@ -65,3 +65,9 @@ const theme = createTheme({
   },
 });
 export default theme;
+
+export const widths = {
+small: '440px',
+medium: '880px',
+large: '1200px',
+};

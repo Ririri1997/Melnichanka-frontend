@@ -1,13 +1,13 @@
 import React from "react";
-import CardForm from '../../../components/CardForm/CardForm';
+import CardWrapper from '../../../components/CardWrapper/CardWrapper';
 
 
 export const Goods = () => {
 
   return (
-    <CardForm title={`Это страница с товарами"`}>
+    <CardWrapper title={`Это страница с товарами"`}>
       <p>Это страница товаров</p>
-      </CardForm>
+      </CardWrapper>
 
   );
 };

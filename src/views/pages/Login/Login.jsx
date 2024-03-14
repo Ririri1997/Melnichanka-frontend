@@ -1,7 +1,7 @@
 import axios from "axios";
 import {useState, useReducer, useEffect} from "react";
 import StyledLogin  from "./Login.styles";
-import CardForm from '../../../components/CardForm/CardForm';
+import CardWrapper from '../../../components/CardWrapper/CardWrapper';
 import Form from '../../../components/Form/Form';
 import {TextField } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -66,7 +66,7 @@ const Login = () => {
 
   return(
     <StyledLogin>
-      <CardForm title='Авторизация'>
+      <CardWrapper title='Авторизация'>
         <Form onFormSubmit={(e) => {submit(e)}}>
           <TextField 
             variant="outlined" 
@@ -93,7 +93,7 @@ const Login = () => {
           />
           <Button variant="contained" type="submit">Войти</Button>
         </Form>
-      </CardForm>
+      </CardWrapper>
     </StyledLogin>
   )
 }

@@ -1,5 +1,5 @@
 import StyledRegistration from "./Registration.styles";
-import CardForm from "../../../components/CardForm/CardForm";
+import CardWrapper from "../../../components/CardWrapper/CardWrapper";
 import Form from "../../../components/Form/Form";
 import { FormControl, InputLabel, Select, MenuItem, TextField, FormHelperText } from "@mui/material";
 import React, { useEffect, useState, useReducer } from "react";
@@ -19,8 +19,10 @@ function Registration() {
   const navigate = useNavigate();
 
   useEffect(() => {
+		if(isFormReadyToSubmit){
     dispatchForm({type: 'SUBMIT', values});
-  }, []); 
+  }
+}, [isFormReadyToSubmit, values]);
 
   const onChange = (name, value) => {
     dispatchForm({type: 'SET_VALUE', payload: { [name]: value }});
@@ -99,7 +101,7 @@ function Registration() {
 }
 return (
     <StyledRegistration>
-      <CardForm title="Регистрация">
+      <CardWrapper title="Регистрация">
         <Form onFormSubmit={(e) => {handleFormSubmit(e)}} >
           <TextField
             variant="outlined"
@@ -219,7 +221,7 @@ return (
           />
           <Button variant="contained" type="submit">Зарегистироваться</Button>
         </Form>
-      </CardForm>
+      </CardWrapper>
     </StyledRegistration>
   );
 }
