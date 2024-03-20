@@ -1,5 +1,5 @@
 import StyledCardWrapper  from './CardWrapper.styles'
-import TitleMedium from '../../style/settings.styles';
+import {TitleMedium} from '../../style/settings.styles';
 
 function CardWrapper({title, children, width }) {
   return (

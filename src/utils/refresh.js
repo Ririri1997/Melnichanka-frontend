@@ -1,15 +1,40 @@
 import axios from "axios";
 
-let refresh = false;
-const accessToken = localStorage.getItem('access_token');
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
 
 axios.interceptors.response.use(
-  (resp) => resp,
+  (response) => response,
   async (error) => {
-    if (error.response.status === 401 && !refresh) {
-      refresh = true;
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({resolve, reject});
+        }).then(token => {
+          originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          return axios(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
       const refreshToken = localStorage.getItem('refresh_token');
-      console.log(refreshToken)
       if (refreshToken) {
         try {
           const response = await axios.post(
@@ -18,27 +43,30 @@ axios.interceptors.response.use(
             {
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
               },
               withCredentials: true
             }
           );
+
           if (response.status === 200) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${response.data['access']}`;
             localStorage.setItem('access_token', response.data.access);
-            localStorage.setItem('refresh_token', response.data.refresh);
-            refresh = false;
-            return axios(error.config);
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.access;
+            originalRequest.headers['Authorization'] = 'Bearer ' + response.data.access;
+            processQueue(null, response.data.access);
+            return axios(originalRequest);
           }
         } catch (refreshError) {
-          console.error('Error refreshing token:', refreshError);
+          console.error('Ошибка при обновлении токена:', refreshError);
+          processQueue(refreshError, null);
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
         }
       } else {
-        console.error('Refresh token not found');
+        console.error('Токен обновления не найден');
       }
     }
-    refresh = false;
+
     return Promise.reject(error);
   }
 );
-

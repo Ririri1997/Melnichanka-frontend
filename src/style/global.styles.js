@@ -12,5 +12,6 @@ const GlobalStyled = createGlobalStyle`
   body {
    background: pink;
   }
+  
 `
 export default GlobalStyled;

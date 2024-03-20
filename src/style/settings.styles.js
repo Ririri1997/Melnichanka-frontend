@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-const TitleMedium = styled.span`
+export const TitleMedium = styled.span`
   font-family: "Gabriela", serif;
   font-size: 36px;
   font-weight: 400;
@@ -8,4 +8,12 @@ const TitleMedium = styled.span`
   letter-spacing: 0em;
   text-align: center;
 `
-export default TitleMedium;
+
+
+export const SpanBold = styled.span`
+  font-family: "Roboto", serif;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 24px;
+  text-align: center;
+`
