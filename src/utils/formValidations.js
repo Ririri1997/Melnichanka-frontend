@@ -16,7 +16,7 @@ export const handleMinFive = (value) => {
  
 export const handleFullName = (nameValue) => {
  let fullName = nameValue.trim().replace(/\s+/g, ' ');
- const errorText = fullName.split(' ').length < 2 ? 'Введите полное имя' : false;
+ const errorText = fullName.split(' ').length < 1 ? 'Введите полное имя' : false;
  return errorText;
 }
 

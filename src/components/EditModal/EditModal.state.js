@@ -1,11 +1,10 @@
-import {  handleEmptyField, handleFullName, handlePasswordMatch, handlePasswordValid, handleEmailValid } from '../../../utils/formValidations';
+import {  handleEmptyField } from '../../utils/formValidations';
 
 // handleEmptyField, 
 export const INITIAL_STATE = {
  isValidText: {
   client_name : '',
   destination_city: '',
-  position: '',
   contract_number: '',
   contract_date: '', 
   director_name: '', 
@@ -15,9 +14,8 @@ export const INITIAL_STATE = {
  values: {
   client_name : '',
   destination_city: '',
-  position: '',
   contract_number: '',
-  contract_date: '', 
+  contract_date: new Date().toISOString().split('T')[0], 
   director_name: '', 
   director_position: '',
   last_application_number: '',
@@ -36,13 +34,25 @@ export function formReducer(state, action) {
    return {...state, values:  INITIAL_STATE.values };
   case 'SUBMIT' : {
    const isClientName = handleEmptyField(action.values.client_name);
+   const isSity = handleEmptyField(action.values.destination_city);
+   const isContractNumber = handleEmptyField(action.values.contract_number);
+   const isContractDate = handleEmptyField(action.values.contract_date);
+   const isValidDirectorName = handleEmptyField(action.values.director_name);
+   const isDirectorPosition = handleEmptyField(action.values.director_position);
+   const isApplicationNumber = handleEmptyField(action.values.last_application_number);
 
    return{ 
     ...state,
     isValidText: {
-     client_name : isClientName,
+     client_name: isClientName,
+     destination_city: isSity,
+     contract_number: isContractNumber,
+     contract_date: isContractDate, 
+     director_name: isValidDirectorName,
+     director_position: isDirectorPosition,
+     last_application_number: isApplicationNumber,
     },
-    isFormReadyToSubmit: !isClientName,
+    isFormReadyToSubmit: !isClientName && !isSity && !isContractNumber && !isContractDate && !isValidDirectorName && !isDirectorPosition && !isApplicationNumber
    }
   }
  }
