@@ -6,27 +6,33 @@ import {formReducer, INITIAL_STATE } from './EditModal.state';
 const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => {
   const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
 	const {isValidText, values, isFormReadyToSubmit} = formState;
-  const [editedData, setEditedData] = useState({});
   const [localErrors, setLocalErrors] = useState({});
   const [serverErrors, setServerErrors] = useState({});
   const popupTitle = isCreating ? 'Добавление компании' : 'Редактирование компании'
  
-  console.log(isValidText, isFormReadyToSubmit)
   useEffect(() => {
 		if(isFormReadyToSubmit){
     dispatchForm({type: 'SUBMIT', values});
+    
   }
 }, [isFormReadyToSubmit, values]);
 
-  console.log(values);
+
+useEffect(()=> {
+  if(!rowData) {
+    dispatchForm({type: 'CLEAR'});
+  }
+  dispatchForm({type: 'SET_VALUE', payload: {...rowData }});
+}, [rowData]);
+
   const onChange = (name, value) => {
     dispatchForm({ type: 'SET_VALUE', payload: { [name]: value } });
     dispatchForm({ type: 'SUBMIT', values: { ...values, [name]: value } });
   };
 
-  // const handleSave = (values) => {
-  //   onSave(values);
-  // };
+	// useEffect(()=> {
+	// 	dispatchForm({type: 'SET_VALUE', payload: {...rowData }});
+	// }, [rowData]);
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -37,26 +43,12 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
     setLocalErrors(prevErrors => ({ ...prevErrors, director_name: isValidText.director_name}));
     setLocalErrors(prevErrors => ({ ...prevErrors, director_position: isValidText.director_position}));
     setLocalErrors(prevErrors => ({ ...prevErrors, last_application_number: isValidText.last_application_number}));
-
-    console.log(localErrors);
     if (!isFormReadyToSubmit) {
       return; 
     }
     onSave(values);
-
+    dispatchForm({ type: 'CLEAR'});
   }
-  
-  useEffect(() => {
-    setEditedData({
-      client_name: rowData?.client_name || '',
-      destination_city: rowData?.destination_city || '',
-      contract_number: rowData?.contract_number || '',
-      contract_date: rowData?.contract_date || '',
-      director_name: rowData?.director_name || '',
-      director_position: rowData?.director_position || '',
-      last_application_number: rowData?.last_application_number || '',
-    });
-  }, [rowData]);
 
   return (
     <Dialog open={isOpen} onClose={onClose} style={{ width: '100%' }}>
@@ -68,6 +60,7 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             margin="dense"
             label="Название компании"
             name="client_name"
+            value={values.client_name}
             onChange={(e) => onChange('client_name', e.target.value)} 
             error={!!localErrors.client_name}
             helperText={localErrors.client_name || ''}
@@ -81,7 +74,6 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
               margin="dense"
               label="Город"
               name="destination_city"
-              fullWidth
               value={values.destination_city}
               onChange={(e) => onChange('destination_city', e.target.value)}
             >
@@ -100,6 +92,7 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             type="number"
             label="Номер договора"
             name="contract_number"
+            value={values.contract_number}
             onChange={(e) => onChange('contract_number', e.target.value)}
             error={!!localErrors.contract_number}
             helperText={localErrors.contract_number || ''}
@@ -122,6 +115,7 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             margin="dense"
             label="ФИО директора"
             name="director_name"
+            value={values.director_name}
             onChange = {(e) => onChange('director_name', e.target.value)}
             error={!!localErrors.director_name}
             helperText={localErrors.director_name || ''}
@@ -130,6 +124,7 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             margin="dense"
             label="Должность директора"
             name="director_position"
+            value={values.director_position}
             onChange = {(e) => onChange('director_position', e.target.value)}
             error={!!localErrors.director_position}
             helperText={localErrors.director_position || ''}
@@ -138,6 +133,7 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             margin="dense"
             label="Номер приложения"
             name="last_application_number"
+            value={values.last_application_number}
             onChange = {(e) => onChange('last_application_number', e.target.value)}
             error={!!localErrors.last_application_number}
             helperText={localErrors.last_application_number || ''}

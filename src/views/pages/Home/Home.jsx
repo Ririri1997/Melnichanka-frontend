@@ -41,6 +41,10 @@ export const Home = () => {
     }
   });
 
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedRow(null); // Сбросить selectedRow при закрытии модального окна
+  };
 // принимаем id и выводим sity
   const renderCityName = (cityId) => {
     return cities[cityId] || ''; // Если для данного id нет города, вернем пустую строку
@@ -51,7 +55,27 @@ export const Home = () => {
     setSelectedRow(row); // Устанавливаем выбранную строку
     setIsModalOpen(true); // Открываем модальное окно
   };
-
+  // const handleDeleteClick = async (itemId) => {
+  //   try {
+  //     const accessToken = localStorage.getItem('access_token');
+  //     if (!accessToken) {
+  //       navigate('/login'); 
+  //       return;
+  //     }
+  
+  //     await axios.delete(`http://127.0.0.1:8000/api/v1/clients/${itemId}/`, {
+  //       headers: {
+  //         'Authorization': `Bearer ${accessToken}`,
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+  
+  //     // После успешного удаления обновляем данные
+  //     setClientsData(clientsData.filter(item => item.id !== itemId));
+  //   } catch (error) {
+  //     console.error('Error deleting data:', error);
+  //   }
+  // };
 // выводим в таблицу все компании и города в приличном виде 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,10 +120,6 @@ export const Home = () => {
     fetchData();
   }, [navigate]);
 
-  //закрываем модалку
-  const handleModalClose = () => {
-    setIsModalOpen(false); // Закрываем модальное окно
-  };
 
 
   const handleModalSave = async (newValues) => {
@@ -112,6 +132,7 @@ export const Home = () => {
       }
   
       if (selectedRow) {
+        console.log(newValues);
         // Если selectedRow не равен null, значит, мы пытаемся обновить существующую компанию
         const response = await axios.patch(`http://127.0.0.1:8000/api/v1/clients/${selectedRow.id}/`, newValues, {
           headers: {
@@ -120,7 +141,6 @@ export const Home = () => {
           }
           
         });
-  
         // Обновляем данные после успешного изменения
         setClientsData(clientsData.map(item => (item.id === selectedRow.id ? response.data : item)));
       } else {
@@ -131,7 +151,6 @@ export const Home = () => {
             'Content-Type': 'application/json'
           }
         });
-  
         // Добавляем новую компанию в список клиентов
         setClientsData([...clientsData, response.data]);
       }
@@ -141,6 +160,8 @@ export const Home = () => {
       console.error('Error updating data:', error);
     }
   };
+
+console.log(selectedRow)
 
   return (
     <CardWrapper title={`table hujable`} width="medium">
@@ -183,7 +204,7 @@ export const Home = () => {
                 <TableCell>{renderCityName(item.destination_city)}</TableCell>
                 <TableCell>{item.contract_number}</TableCell>
                 <TableCell onClick={() => handleRenameClick(item)}>Rename</TableCell>
-                <TableCell>Trash</TableCell>
+                <TableCell >Trash</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -192,12 +213,11 @@ export const Home = () => {
 
       <EditModal
       isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
+      onClose={handleModalClose}
       onSave={handleModalSave}
       rowData={selectedRow}
       cities={cities}
-      isCreating={!selectedRow} // добавляем новый пропс для указания на создание компании
-      />
+      isCreating={!selectedRow} />
     </CardWrapper>
   );
 };
