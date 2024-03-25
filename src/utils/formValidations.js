@@ -11,14 +11,14 @@ export const handleEmptyField = (value) => {
 export const handleMinFive = (value) => {
   const errorText = value.length < 5 ? "Это поле должно содержать более пяти" : false;
   return errorText; 
- }
+}
 
  
-export const handleFullName = (nameValue) => {
- let fullName = nameValue.trim().replace(/\s+/g, ' ');
- const errorText = fullName.split(' ').length < 1 ? 'Введите полное имя' : false;
- return errorText;
-}
+// export const handleFullName = (nameValue) => {
+//  let fullName = nameValue.trim().replace(/\s+/g, ' ');
+//  const errorText = fullName.split(' ').length < 1 ? 'Введите полное имя' : false;
+//  return errorText;
+// }
 
 export const handlePasswordMatch = (passwordOne, passwordTwo) =>{
  const errorText = passwordOne !== passwordTwo ? 'Пароли не совпадают' : false;

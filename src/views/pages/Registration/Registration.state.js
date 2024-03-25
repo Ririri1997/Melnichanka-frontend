@@ -1,4 +1,4 @@
-import { handleTel, handleEmptyField, handleFullName, handlePasswordMatch, handlePasswordValid, handleEmailValid } from '../../../utils/formValidations';
+import { handleTel, handleEmptyField, handlePasswordMatch, handlePasswordValid, handleEmailValid } from '../../../utils/formValidations';
 
 // handleEmptyField, 
 export const INITIAL_STATE = {
@@ -35,7 +35,7 @@ export function formReducer(state, action) {
   case 'CLEAR':  
    return {...state, values:  INITIAL_STATE.values };
   case 'SUBMIT' : {
-   const isValidName = handleFullName(action.values.full_name);
+   const isValidName = handleEmptyField(action.values.full_name);
    const isValidPersonalTel = handleTel(action.values.phone_number_personal, 'phone_number_personal');
    const isValidWorkTel = handleTel(action.values.phone_number_work, 'phone_number_work');
    const isValidEmail = handleEmailValid(action.values.email);

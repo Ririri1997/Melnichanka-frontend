@@ -56,6 +56,7 @@ function Registration() {
   // Функция для обработки отправки формы
  const handleFormSubmit = async (event) => {
   event.preventDefault();
+  onChange(event.target.name, event.target.value);
   setLocalErrors(prevErrors => ({ ...prevErrors, full_name: isValidText.full_name}));
   setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_personal: isValidText.phone_number_personal }));
   setLocalErrors(prevErrors => ({ ...prevErrors, phone_number_work: isValidText.phone_number_work }));

@@ -32,7 +32,7 @@ export function formReducer(state, action) {
    return {...state,  isValidText:  INITIAL_STATE. isValidText};
   case 'CLEAR':  
    return {...state, values:  INITIAL_STATE.values };
-  case 'SUBMIT' : {
+  case 'SUBMIT': {
    const isClientName = handleEmptyField(action.values.client_name);
    const isSity = handleEmptyField(action.values.destination_city);
    const isContractNumber = handleEmptyField(action.values.contract_number);

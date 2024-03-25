@@ -2,40 +2,51 @@ import React, { useState, useEffect, useReducer } from 'react';
 import {FormControl, FormHelperText, MenuItem, InputLabel, Select, TextField, Button, DialogActions, DialogContent, DialogTitle, Dialog} from '@mui/material';
 import Form from '../Form/Form';
 import {formReducer, INITIAL_STATE } from './EditModal.state';
+import axios from 'axios';
 
 const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => {
   const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
 	const {isValidText, values, isFormReadyToSubmit} = formState;
   const [localErrors, setLocalErrors] = useState({});
-  const [serverErrors, setServerErrors] = useState({});
-  const popupTitle = isCreating ? 'Добавление компании' : 'Редактирование компании'
- 
+  // const [serverErrors, setServerErrors] = useState({});
+  const popupTitle = isCreating ? 'Добавление компании' : 'Редактирование компании';
+  const buttonText = isCreating ? 'Добавить компанию' : 'Сохранить';
+  const [positions, setPositions] = useState([]);
+
   useEffect(() => {
 		if(isFormReadyToSubmit){
     dispatchForm({type: 'SUBMIT', values});
-    
-  }
-}, [isFormReadyToSubmit, values]);
+    }
+  }, [isFormReadyToSubmit, values]);
 
+  useEffect(() => {
+    const fetchPositions = async () =>{
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/v1/clients/director_position/');
+        setPositions(response.data);
+      } catch (error){
+        console.error('Ошибка при получении списка позиций директора : ', error)
+      }
+    };
+    fetchPositions();
+  }, []);
 
-useEffect(()=> {
-  if(!rowData) {
-    dispatchForm({type: 'CLEAR'});
-  }
-  dispatchForm({type: 'SET_VALUE', payload: {...rowData }});
-}, [rowData]);
+  useEffect(()=> {
+    if(!rowData) {
+      dispatchForm({type: 'CLEAR'});
+    }
+    dispatchForm({type: 'SET_VALUE', payload: {...rowData }});
+  }, [rowData]);
 
   const onChange = (name, value) => {
     dispatchForm({ type: 'SET_VALUE', payload: { [name]: value } });
     dispatchForm({ type: 'SUBMIT', values: { ...values, [name]: value } });
   };
 
-	// useEffect(()=> {
-	// 	dispatchForm({type: 'SET_VALUE', payload: {...rowData }});
-	// }, [rowData]);
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
+    onChange(event.target.name, event.target.value);
     setLocalErrors(prevErrors => ({ ...prevErrors, client_name: isValidText.client_name}));
     setLocalErrors(prevErrors => ({ ...prevErrors, destination_city: isValidText.destination_city}));
     setLocalErrors(prevErrors => ({ ...prevErrors, contract_number: isValidText.contract_number}));
@@ -129,6 +140,24 @@ useEffect(()=> {
             error={!!localErrors.director_position}
             helperText={localErrors.director_position || ''}
           />
+          <FormControl variant="outlined" fullWidth error={!!localErrors.position}>
+            <InputLabel id="position">Позиция директора</InputLabel>
+            <Select
+              labelId="position"
+              id="demo-simple-select"
+              label="Позиция"
+              onChange={(e) => onChange('position', e.target.value)}
+              value={values.position}
+              required
+              > 
+              {positions.map((item, i) => (
+                <MenuItem value={item.id} key={i}>{item.position}</MenuItem>
+              ))}
+            </Select>
+              {!!localErrors.position && (
+                <FormHelperText>{localErrors.position}</FormHelperText>
+              )}
+          </FormControl>
           <TextField
             margin="dense"
             label="Номер приложения"
@@ -141,11 +170,14 @@ useEffect(()=> {
         </Form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">
-          Отмена
+      <Button 
+        variant="contained" 
+        onClick={(e) => {handleFormSubmit(e)}} 
+        color="primary">
+          {buttonText}
         </Button>
-        <Button onClick={(e) => {handleFormSubmit(e)}} color="primary">
-          Сохранить
+        <Button variant="outlined"  onClick={onClose} color="primary">
+          Отмена
         </Button>
       </DialogActions>
     </Dialog>

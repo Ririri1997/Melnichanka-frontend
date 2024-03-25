@@ -55,27 +55,29 @@ export const Home = () => {
     setSelectedRow(row); // Устанавливаем выбранную строку
     setIsModalOpen(true); // Открываем модальное окно
   };
-  // const handleDeleteClick = async (itemId) => {
-  //   try {
-  //     const accessToken = localStorage.getItem('access_token');
-  //     if (!accessToken) {
-  //       navigate('/login'); 
-  //       return;
-  //     }
+
+  const handleDeleteClick = async (itemId) => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        navigate('/login'); 
+        return;
+      }
   
-  //     await axios.delete(`http://127.0.0.1:8000/api/v1/clients/${itemId}/`, {
-  //       headers: {
-  //         'Authorization': `Bearer ${accessToken}`,
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
+      await axios.delete(`http://127.0.0.1:8000/api/v1/clients/delete/${itemId}/`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json' 
+        }
+      });
   
-  //     // После успешного удаления обновляем данные
-  //     setClientsData(clientsData.filter(item => item.id !== itemId));
-  //   } catch (error) {
-  //     console.error('Error deleting data:', error);
-  //   }
-  // };
+      // После успешного удаления обновляем данные
+      setClientsData(clientsData.filter(item => item.id !== itemId));
+    } catch (error) {
+      console.error('Error deleting data:', error);
+    }
+  };
+  
 // выводим в таблицу все компании и города в приличном виде 
   useEffect(() => {
     const fetchData = async () => {
@@ -203,8 +205,12 @@ console.log(selectedRow)
                 <TableCell>{item.client_name}</TableCell>
                 <TableCell>{renderCityName(item.destination_city)}</TableCell>
                 <TableCell>{item.contract_number}</TableCell>
-                <TableCell onClick={() => handleRenameClick(item)}>Rename</TableCell>
-                <TableCell >Trash</TableCell>
+                <TableCell onClick={() => handleRenameClick(item)}>
+                  <img src="img/pen.svg" alt="rename" />
+                </TableCell>
+                <TableCell onClick={() => handleDeleteClick(item.id)}>
+                  <img src="img/delete.svg" alt="rename" />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
