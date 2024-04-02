@@ -71,3 +71,9 @@ small: '440px',
 medium: '880px',
 large: '1200px',
 };
+
+export const borderRadius = {
+  small: '5px',
+  medium: '12px',
+  large: '24px',
+  };

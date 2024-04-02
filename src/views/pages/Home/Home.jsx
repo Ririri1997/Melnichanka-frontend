@@ -1,13 +1,35 @@
+import StyledTableCell from './Home.styles'
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import CardWrapper from '../../../components/CardWrapper/CardWrapper';
-import Button from "@mui/material/Button";
 import { useNavigate } from 'react-router-dom'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
+import {Button, Stepper, Step, StepButton, IconButton,  Grid, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import { SpanBold } from "../../../style/settings.styles";
 import EditModal from "../../../components/EditModal/EditModal"; // Импортируем компонент модального окна
-import { createGlobalStyle } from "styled-components";
+import DeleteIcon from '@mui/icons-material/Delete';
+import CreateIcon from '@mui/icons-material/Create';
+import Header from '../../containers/Header/Header';
 
+
+
+function getSteps() {
+  return ['Компании', 'Товары', 'Способ доставки', 'Скачивание'];
+}
+
+function getStepContent(step) {
+  switch (step) {
+    case 0:
+      return 'Компании';
+    case 1:
+      return 'Товары';
+    case 2:
+      return 'Способ доставки';
+    case 3:
+      return 'Скачивание';
+    default:
+      return 'Unknown step';
+  }
+}
 
 export const Home = () => {
   const [clientsData, setClientsData] = useState([]);
@@ -17,9 +39,72 @@ export const Home = () => {
   const [cities, setCities] = useState({});
   const [selectedRow, setSelectedRow] = useState(null); // Состояние для отслеживания выбранной строки
   const [isModalOpen, setIsModalOpen] = useState(false); // Состояние для открытия/закрытия модального окна
-
-
+  const [userName, setUserName] = useState('');
+  const [activeStep, setActiveStep] = React.useState(0);
+  const [completed, setCompleted] = React.useState({});
+  const steps = getSteps();
   const navigate = useNavigate();
+
+
+
+// steppers 
+
+const totalSteps = () => {
+  return steps.length;
+};
+
+const completedSteps = () => {
+  return Object.keys(completed).length;
+};
+
+const isLastStep = () => {
+  return activeStep === totalSteps() - 1;
+};
+
+const allStepsCompleted = () => {
+  return completedSteps() === totalSteps();
+};
+
+const handleNext = () => {
+  const newActiveStep =
+    isLastStep() && !allStepsCompleted()
+      ? // It's the last step, but not all steps have been completed,
+        // find the first step that has been completed
+        steps.findIndex((step, i) => !(i in completed))
+      : activeStep + 1;
+  setActiveStep(newActiveStep);
+};
+
+
+const handleStep = (step) => () => {
+  setActiveStep(step);
+};
+
+const handleComplete = () => {
+  const newCompleted = completed;
+  newCompleted[activeStep] = true;
+  setCompleted(newCompleted);
+  handleNext();
+};
+
+  useEffect(() => {
+    const datafetchData = async () => {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+
+      const {data} = await axios.get('http://127.0.0.1:8000/api/v1/users/edit/', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      setUserName(data.full_name);
+      } catch(error){
+        console.log(error);
+      }
+    }
+    datafetchData();
+  }, [navigate] );
 
 // функция, которая меняет порядок сортировки
   const handleSort = (column) => {
@@ -122,7 +207,7 @@ export const Home = () => {
     fetchData();
   }, [navigate]);
 
-
+console.log(selectedRow)
 
   const handleModalSave = async (newValues) => {
     try {
@@ -134,7 +219,6 @@ export const Home = () => {
       }
   
       if (selectedRow) {
-        console.log(newValues);
         // Если selectedRow не равен null, значит, мы пытаемся обновить существующую компанию
         const response = await axios.patch(`http://127.0.0.1:8000/api/v1/clients/${selectedRow.id}/`, newValues, {
           headers: {
@@ -163,15 +247,46 @@ export const Home = () => {
     }
   };
 
-console.log(selectedRow)
-
   return (
-    <CardWrapper title={`table hujable`} width="medium">
-      <Button variant="contained" href="/logout">Дохлебывай и уходи</Button>
-      
-      <Button onClick={() => setIsModalOpen(true)} color="primary">
-          Добавить компанию
-        </Button>
+    <>
+    <Header userName={userName}/>
+    <CardWrapper borderRadius="medium" width="medium" marginBottom="20px" padding='24px 28px'> 
+      <Stepper nonLinear activeStep={activeStep} style={{ width: '100%' }}>
+        {steps.map((label, index) => (
+          <Step key={label}>
+            <StepButton onClick={handleStep(index)} completed={completed[index]}>
+              {label}
+            </StepButton>
+          </Step>
+        ))}
+      </Stepper>
+    </CardWrapper>
+    <CardWrapper borderRadius="medium" width="medium" padding="32px 28px">
+      <Grid container justifyContent="space-between">
+        <Grid item>
+          <TextField
+            label="Название"
+            variant="outlined"
+            onChange={(e) => console.log(e.target.value)}
+          />
+        </Grid>
+        <Grid item sx={{ marginLeft: 2 }}>
+          <TextField
+            label="Город"
+            variant="outlined"
+            onChange={(e) => console.log(e.target.value)}
+          />
+        </Grid>
+        <Grid item sx={{ marginLeft: 'auto' }}>
+          <Button
+            variant="outlined"
+            onClick={() => setIsModalOpen(true)}
+            color="primary"
+          >
+            + Компания
+          </Button>
+        </Grid>
+      </Grid>
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -205,12 +320,16 @@ console.log(selectedRow)
                 <TableCell>{item.client_name}</TableCell>
                 <TableCell>{renderCityName(item.destination_city)}</TableCell>
                 <TableCell>{item.contract_number}</TableCell>
-                <TableCell onClick={() => handleRenameClick(item)}>
-                  <img src="img/pen.svg" alt="rename" />
-                </TableCell>
-                <TableCell onClick={() => handleDeleteClick(item.id)}>
-                  <img src="img/delete.svg" alt="rename" />
-                </TableCell>
+                <StyledTableCell onClick={() => handleRenameClick(item)}>
+                <IconButton aria-label="create" >
+                    <CreateIcon fontSize="small" />
+                  </IconButton>
+                </StyledTableCell>
+                <StyledTableCell onClick={() => handleDeleteClick(item.id)}>
+                  <IconButton aria-label="delete" >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </StyledTableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -225,5 +344,11 @@ console.log(selectedRow)
       cities={cities}
       isCreating={!selectedRow} />
     </CardWrapper>
+    </>
   );
 };
+
+// при клике на компанию мы переходим на другой шаг - ставится кнопка выполнено и нас переносит на товары 
+// реализовать поиск по вводу символов или по кнопке
+//хедер 
+// 

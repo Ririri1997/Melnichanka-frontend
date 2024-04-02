@@ -10,7 +10,7 @@ const GlobalStyled = createGlobalStyle`
   }
 
   body {
-   background: url('img/bg.png');
+   background: url('img/bg.png') #F2F2F2;
   }
   
 `

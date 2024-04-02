@@ -17,3 +17,4 @@ export const SpanBold = styled.span`
   line-height: 24px;
   text-align: center;
 `
+

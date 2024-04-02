@@ -1,16 +1,18 @@
 import styled from 'styled-components';
-import { widths } from '../../theme/theme'; // Импортируем значения ширины из темы
+import { widths, borderRadius } from '../../theme/theme';
 
-const CardWrapper = styled.div`
- padding: 48px 32px;
- background-color: #fff;
- border-radius: 24px;
- box-shadow: 0px 8px 20px 0px #00000026;
- max-width: ${({ width }) => widths[width] || '440px'}; 
- margin: auto;
- display: grid;
- grid-template-columns: 1fr;
- place-items: center;
- gap: 24px;
-`
-export default CardWrapper;
+const StyledCardWrapper = styled.div`
+  padding: ${(props) => props.$padding || '0px'};
+  background-color: #fff;
+  border-radius: ${(props) =>  (borderRadius[props.$bdrd] || '24px')};
+  box-shadow: 0px 8px 20px 0px #0000000F;
+  max-width: ${({ width }) => widths[width] || '440px'}; 
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 24px;
+  margin-bottom: ${(props) => props.$marginBottom || '0px'};
+`;
+
+export default StyledCardWrapper;

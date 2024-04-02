@@ -1,9 +1,9 @@
-import StyledCardWrapper  from './CardWrapper.styles'
-import {TitleMedium} from '../../style/settings.styles';
+import StyledCardWrapper from './CardWrapper.styles';
+import { TitleMedium } from '../../style/settings.styles';
 
-function CardWrapper({title, children, width }) {
+function CardWrapper({ title, children, width, marginBottom, padding, borderRadius }) {
   return (
-    <StyledCardWrapper width={width}>
+    <StyledCardWrapper $padding={padding} $bdrd={borderRadius} $marginBottom={marginBottom} width={width}>
       <TitleMedium>{title}</TitleMedium>
       {children}
     </StyledCardWrapper>

@@ -6,23 +6,24 @@ import axios from 'axios';
 
 const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => {
   const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
-	const {isValidText, values, isFormReadyToSubmit} = formState;
-  const [localErrors, setLocalErrors] = useState({});
-  // const [serverErrors, setServerErrors] = useState({});
+  const { isValidText, values, isFormReadyToSubmit } = formState;
   const popupTitle = isCreating ? 'Добавление компании' : 'Редактирование компании';
   const buttonText = isCreating ? 'Добавить компанию' : 'Сохранить';
   const [positions, setPositions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-		if(isFormReadyToSubmit){
-    dispatchForm({type: 'SUBMIT', values});
+    if (isSubmitting && isFormReadyToSubmit) {
+      onSave(values);
+      dispatchForm({ type: 'CLEAR' });
+      setIsSubmitting(false); // Сброс состояния отправки после выполнения действий
     }
-  }, [isFormReadyToSubmit, values]);
+  }, [isSubmitting, isFormReadyToSubmit, onSave, values]);
 
   useEffect(() => {
     const fetchPositions = async () =>{
       try {
-        const response = await axios.get('http://127.0.0.1:8000/v1/clients/director_position/');
+        const response = await axios.get('http://127.0.0.1:8000/api/v1/clients/directorposition/');
         setPositions(response.data);
       } catch (error){
         console.error('Ошибка при получении списка позиций директора : ', error)
@@ -32,37 +33,28 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
   }, []);
 
   useEffect(()=> {
-    if(!rowData) {
-      dispatchForm({type: 'CLEAR'});
-    }
-    dispatchForm({type: 'SET_VALUE', payload: {...rowData }});
+    if (rowData) {
+      dispatchForm({type: 'SET_ROW_DATA', payload: { ...rowData}});
+    } 
   }, [rowData]);
 
   const onChange = (name, value) => {
     dispatchForm({ type: 'SET_VALUE', payload: { [name]: value } });
-    dispatchForm({ type: 'SUBMIT', values: { ...values, [name]: value } });
+  };
+  
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    dispatchForm({ type: 'SUBMIT', values });
+    setIsSubmitting(true); // Установка состояния отправки при нажатии кнопки отправки формы
   };
 
-
-  const handleFormSubmit = async (event) => {
-    event.preventDefault();
-    onChange(event.target.name, event.target.value);
-    setLocalErrors(prevErrors => ({ ...prevErrors, client_name: isValidText.client_name}));
-    setLocalErrors(prevErrors => ({ ...prevErrors, destination_city: isValidText.destination_city}));
-    setLocalErrors(prevErrors => ({ ...prevErrors, contract_number: isValidText.contract_number}));
-    setLocalErrors(prevErrors => ({ ...prevErrors, contract_date: isValidText.contract_date}));
-    setLocalErrors(prevErrors => ({ ...prevErrors, director_name: isValidText.director_name}));
-    setLocalErrors(prevErrors => ({ ...prevErrors, director_position: isValidText.director_position}));
-    setLocalErrors(prevErrors => ({ ...prevErrors, last_application_number: isValidText.last_application_number}));
-    if (!isFormReadyToSubmit) {
-      return; 
-    }
-    onSave(values);
-    dispatchForm({ type: 'CLEAR'});
+  const onCloseFunction = () => {
+    onClose();
+    dispatchForm({ type: 'CLEAR' });
   }
-
+  
   return (
-    <Dialog open={isOpen} onClose={onClose} style={{ width: '100%' }}>
+    <Dialog open={isOpen} onClose={onCloseFunction} style={{ width: '100%' }}>
       <DialogTitle style={{ width: '100%' }}>{popupTitle}</DialogTitle>
       <DialogContent style={{ width: '508px' }}>
         <Form>
@@ -73,11 +65,11 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             name="client_name"
             value={values.client_name}
             onChange={(e) => onChange('client_name', e.target.value)} 
-            error={!!localErrors.client_name}
-            helperText={localErrors.client_name || ''}
+            error={!!isValidText.client_name}
+            helperText={isValidText.client_name || ''}
             />
           <FormControl variant="outlined" fullWidth
-          error={!!localErrors.destination_city}
+          error={!!isValidText.destination_city}
           >
             <InputLabel id="city">Город</InputLabel>
             <Select 
@@ -94,8 +86,8 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
               </MenuItem>
               ))}
             </Select>
-            {!!localErrors.destination_city && (
-            <FormHelperText>{localErrors.destination_city}</FormHelperText>
+            {!!isValidText.destination_city && (
+            <FormHelperText>{isValidText.destination_city}</FormHelperText>
             )}
           </FormControl>
           <TextField
@@ -105,8 +97,8 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             name="contract_number"
             value={values.contract_number}
             onChange={(e) => onChange('contract_number', e.target.value)}
-            error={!!localErrors.contract_number}
-            helperText={localErrors.contract_number || ''}
+            error={!!isValidText.contract_number}
+            helperText={isValidText.contract_number || ''}
           />
           <TextField
             id="date"
@@ -116,8 +108,8 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             type="date"
             value={values.contract_date}
             onChange = {(e) => onChange('contract_date', e.target.value)}
-            error={!!localErrors.contract_date}
-            helperText={localErrors.contract_date || ''}
+            error={!!isValidText.contract_date}
+            helperText={isValidText.contract_date || ''}
             InputLabelProps={{
               shrink: true,
             }}
@@ -128,34 +120,26 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             name="director_name"
             value={values.director_name}
             onChange = {(e) => onChange('director_name', e.target.value)}
-            error={!!localErrors.director_name}
-            helperText={localErrors.director_name || ''}
+            error={!!isValidText.director_name}
+            helperText={isValidText.director_name || ''}
           />
-          <TextField
-            margin="dense"
-            label="Должность директора"
-            name="director_position"
-            value={values.director_position}
-            onChange = {(e) => onChange('director_position', e.target.value)}
-            error={!!localErrors.director_position}
-            helperText={localErrors.director_position || ''}
-          />
-          <FormControl variant="outlined" fullWidth error={!!localErrors.position}>
-            <InputLabel id="position">Позиция директора</InputLabel>
+
+          <FormControl variant="outlined"  error={!!isValidText.director_position}>
+            <InputLabel id="director_position">Позиция директора</InputLabel>
             <Select
-              labelId="position"
+              labelId="director_position"
               id="demo-simple-select"
-              label="Позиция"
-              onChange={(e) => onChange('position', e.target.value)}
-              value={values.position}
+              label="Позиция директора"
+              onChange={(e) => onChange('director_position', e.target.value)}
+              value={values.director_position}
               required
               > 
               {positions.map((item, i) => (
-                <MenuItem value={item.id} key={i}>{item.position}</MenuItem>
+                <MenuItem value={item.id} key={i}>{item.director_position}</MenuItem>
               ))}
             </Select>
-              {!!localErrors.position && (
-                <FormHelperText>{localErrors.position}</FormHelperText>
+              {!!isValidText.director_position && (
+                <FormHelperText>{isValidText.director_position}</FormHelperText>
               )}
           </FormControl>
           <TextField
@@ -164,19 +148,19 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
             name="last_application_number"
             value={values.last_application_number}
             onChange = {(e) => onChange('last_application_number', e.target.value)}
-            error={!!localErrors.last_application_number}
-            helperText={localErrors.last_application_number || ''}
+            error={!!isValidText.last_application_number}
+            helperText={isValidText.last_application_number || ''}
           />
         </Form>
       </DialogContent>
       <DialogActions>
-      <Button 
-        variant="contained" 
-        onClick={(e) => {handleFormSubmit(e)}} 
-        color="primary">
-          {buttonText}
+        <Button 
+          variant="contained" 
+          onClick={handleFormSubmit} 
+          color="primary">
+            {buttonText}
         </Button>
-        <Button variant="outlined"  onClick={onClose} color="primary">
+        <Button variant="outlined"  onClick={onCloseFunction} color="primary">
           Отмена
         </Button>
       </DialogActions>

@@ -102,7 +102,7 @@ function Registration() {
 }
 return (
     <StyledRegistration>
-      <CardWrapper title="Регистрация">
+      <CardWrapper title="Регистрация" padding='48px 32px'>
         <Form onFormSubmit={(e) => {handleFormSubmit(e)}} >
           <TextField
             variant="outlined"

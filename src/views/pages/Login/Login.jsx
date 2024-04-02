@@ -58,6 +58,7 @@ const Login = () => {
       localStorage.setItem('refresh_token', data.refresh);
       axios.defaults.headers.common['Authorization'] = `Bearer ${data['access']}`;
       navigate(fromPage, { replace: true });
+
     } catch (error) {
       // console.error('An error occurred while logging in:', error);
       setServerErrors({ error: error.response.data.detail })
@@ -66,7 +67,7 @@ const Login = () => {
 
   return(
     <StyledLogin>
-      <CardWrapper title='Авторизация'>
+      <CardWrapper title='Авторизация' padding='48px 32px'>
         <Form onFormSubmit={(e) => {submit(e)}}>
           <TextField 
             variant="outlined" 
