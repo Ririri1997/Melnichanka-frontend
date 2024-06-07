@@ -33,6 +33,8 @@ export function clientsReducer(state, action) {
      return { ...state, activeStep: action.payload };
    case 'setCompleted':
      return { ...state, completed: action.payload };
+   case 'setNewClients':
+    return { ...state, isModalOpen: true, selectedRow: false };
    default:
      throw new Error();
  }

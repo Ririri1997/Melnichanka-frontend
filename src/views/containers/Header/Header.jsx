@@ -13,7 +13,7 @@ function Header() {
       try {
         const accessToken = localStorage.getItem('access_token');
 
-      const {data} = await axios.get('http://127.0.0.1:8000/api/v1/users/edit/', {
+      const {data} = await axios.get('http://145.239.84.6/api/v1/users/edit/', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'

@@ -1,30 +1,68 @@
 import { useNavigate } from 'react-router-dom'
 import CardWrapper from '../../../components/CardWrapper/CardWrapper';
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import {Button, IconButton,  Grid, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import { SpanBold } from "../../../style/settings.styles";
 import DeleteIcon from '@mui/icons-material/Delete';
 import CreateIcon from '@mui/icons-material/Create';
 import axios from "axios";
 import {clientsReducer, INITIAL_STATE } from './Clients.state';
-import { styled } from '@mui/system';
 import EditModal from "../../../components/EditModal/EditModal"; // Импортируем компонент модального окна
-
+import StyledTableCell from '../../../style/settings.styles';
 // Создаем новый стилизованный компонент на основе TableCell
- const StyledTableCell = styled(TableCell)`
-  cursor: pointer;
-  img {
-    width: 24px;
-    height: 24px;
-  }
-`;
-export default StyledTableCell
+
 
 export const Clients = ({onSelectRow }) => {
-  const [state, dispatch] = useReducer(clientsReducer, INITIAL_STATE );
-  const { clientsData, sortDirection, activeColumn, loading, cities, selectedRow, isModalOpen, userName, activeStep, completed } = state;
+  const [{ clientsData, sortDirection, activeColumn, cities, selectedRow, isModalOpen, activeStep, completed }, dispatch] = useReducer(clientsReducer, INITIAL_STATE);
+  const navigate = useNavigate();
+  const [searchName, setSearchName] = useState('');
+  const [searchCity, setSearchCity] = useState('');
 
-const navigate = useNavigate();
+  // выводим в таблицу все компании и города в приличном виде 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+        if (!accessToken) {
+          navigate('/login'); 
+          return;
+        }
+
+        const [clientsRes, citiesRes] = await Promise.all([
+          axios.get('http://145.239.84.6/api/v1/clients/', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }),
+          axios.get('http://145.239.84.6/api/v1/city', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          })
+        ]);
+
+        const clients = clientsRes.data;
+        const citiesData = citiesRes.data.reduce((acc, city) => {
+          acc[city.id] = city.city;
+          return acc;
+        }, {});
+        dispatch({ type: 'setClientsData', payload: clients });
+        dispatch({ type: 'setCities', payload: citiesData });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        if (error.response && error.response.status === 401) {
+          navigate('/login'); 
+        }
+      } finally {
+        dispatch({ type: 'setLoading', payload: false });
+      }
+    };
+    fetchData();
+  }, [navigate]);
+
+
 // функция, которая меняет порядок сортировки
   const handleSort = (column) => {
     if (column === activeColumn) {
@@ -51,8 +89,7 @@ const navigate = useNavigate();
         navigate('/login'); 
         return;
       }
-  
-      await axios.delete(`http://127.0.0.1:8000/api/v1/clients/delete/${itemId}/`, {
+      await axios.delete(`http://145.239.84.6/api/v1/clients/delete/${itemId}/`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json' 
@@ -82,49 +119,12 @@ const navigate = useNavigate();
       return 0;
     }
   });
-// выводим в таблицу все компании и города в приличном виде 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        navigate('/login'); 
-        return;
-      }
-
-      const [clientsRes, citiesRes] = await Promise.all([
-        axios.get('http://127.0.0.1:8000/api/v1/clients/', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        }),
-        axios.get('http://127.0.0.1:8000/api/v1/city', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        })
-      ]);
-
-      const clients = clientsRes.data;
-      const citiesData = citiesRes.data.reduce((acc, city) => {
-        acc[city.id] = city.city;
-        return acc;
-      }, {});
-      dispatch({ type: 'setClientsData', payload: clients });
-      dispatch({ type: 'setCities', payload: citiesData });
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      if (error.response && error.response.status === 401) {
-        navigate('/login'); 
-      }
-    } finally {
-      dispatch({ type: 'setLoading', payload: false });
-    }
-  };
-  fetchData();
-}, [navigate]);
+  
+  const filteredClientsData = sortedClientsData.filter(item => {
+   const clientNameMatches = item.client_name.toLowerCase().includes(searchName);
+   const cityNameMatches = renderCityName(item.destination_city).toLowerCase().includes(searchCity);
+   return clientNameMatches && cityNameMatches;
+ });
 
 
 const handleModalClose = () => {
@@ -145,7 +145,7 @@ const handleModalSave = async (newValues) => {
     }
 
     if (selectedRow) {
-      const response = await axios.patch(`http://127.0.0.1:8000/api/v1/clients/${selectedRow.id}/`, newValues, {
+      const response = await axios.patch(`http://145.239.84.6/api/v1/clients/${selectedRow.id}/`, newValues, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
@@ -156,7 +156,7 @@ const handleModalSave = async (newValues) => {
       dispatch({ type: 'setClientsData', payload: clientsData.map(item => (item.id === selectedRow.id ? response.data : item)) });
     } else {
       // Иначе, если selectedRow равен null, значит, мы пытаемся создать новую компанию
-      const response = await axios.post(`http://127.0.0.1:8000/api/v1/clients/`, newValues, {
+      const response = await axios.post(`http://145.239.84.6/api/v1/clients/`, newValues, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
@@ -172,6 +172,14 @@ const handleModalSave = async (newValues) => {
   }
 };
 
+const findName = (text) => {
+ setSearchName(text.toLowerCase());
+};
+
+
+const findCity = (text) => {
+ setSearchCity(text.toLowerCase());
+};
 return (
 <CardWrapper 
 borderRadius="medium" 
@@ -184,20 +192,20 @@ padding="32px 28px">
       <TextField
       label="Название"
       variant="outlined"
-      onChange={(e) => console.log(e.target.value)}
+      onChange={(e) => findName(e.target.value)}
       />
     </Grid>
     <Grid item sx={{ marginLeft: 2 }}>
       <TextField
       label="Город"
       variant="outlined"
-      onChange={(e) => console.log(e.target.value)}
+      onChange={(e) => findCity(e.target.value)}
       />
     </Grid>
     <Grid item sx={{ marginLeft: 'auto' }}>
       <Button
       variant="outlined"
-      onClick={() => dispatch({ type: 'setIsModalOpen', payload: true })}
+      onClick={() => dispatch({ type: 'setNewClients'})}
       color="primary"
       >
         + Компания
@@ -232,7 +240,7 @@ padding="32px 28px">
         </TableRow>
       </TableHead>
       <TableBody>
-        {sortedClientsData.map((item, index) => (
+      {filteredClientsData.map((item, index) => (
           <TableRow 
           hover 
           role="checkbox" 
@@ -243,12 +251,12 @@ padding="32px 28px">
             <TableCell>{item.client_name}</TableCell>
             <TableCell>{renderCityName(item.destination_city)}</TableCell>
             <TableCell>{item.contract_number}</TableCell>
-            <StyledTableCell onClick={() => handleRenameClick(item)}>
+            <StyledTableCell onClick={(e) => { e.stopPropagation(); handleRenameClick(item); }}>
             <IconButton aria-label="create" >
                 <CreateIcon fontSize="small" />
               </IconButton>
             </StyledTableCell>
-            <StyledTableCell onClick={() => handleDeleteClick(item.id)}>
+            <StyledTableCell onClick={(e) => { e.stopPropagation(); handleDeleteClick(item.id); }}>
               <IconButton aria-label="delete" >
                 <DeleteIcon fontSize="small" />
               </IconButton>

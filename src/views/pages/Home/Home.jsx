@@ -4,7 +4,7 @@ import { Stepper, Step, StepButton } from '@mui/material';
 import Header from '../../containers/Header/Header';
 import { Clients } from '../../containers/Clients/Clients';
 import { Goods } from '../Goods/Goods';
-
+import { Delivery } from "../Delivery/Delivery";
 function getSteps() {
   return ['Компании', 'Товары', 'Способ доставки', 'Скачивание'];
 }
@@ -44,7 +44,7 @@ export const Home = () => {
           {steps.map((label, index) => (
             <Step key={label} completed={completed[index]}>
               <StepButton
-                  onClick={handleStep(index)} // отвечает за кликабельность шагов 
+                  onClick={handleStep(index)} // отвечает за кликабельность элементов степпера 
                   completed={completed[index].toString()}>
                   {label}
               </StepButton>
@@ -53,7 +53,8 @@ export const Home = () => {
         </Stepper>
       </CardWrapper>
       {activeStep === 0 && <Clients onSelectRow={handleRowSelect} />}
-      {activeStep === 1 && <Goods />}
+      {activeStep === 1 && <Goods onSelectRow={handleRowSelect}/>}
+      {activeStep === 2 && <Delivery />}
     </>
   );
 };

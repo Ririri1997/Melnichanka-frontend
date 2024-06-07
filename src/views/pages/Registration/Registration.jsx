@@ -32,7 +32,7 @@ function Registration() {
   useEffect(() => {
     const fetchPositions = async () =>{
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/users/positions/');
+        const response = await axios.get('http://145.239.84.6/api/v1/users/positions/');
         setPositions(response.data);
       } catch (error){
         console.error('Ошибка при получении списка позиций: ', error)
@@ -44,7 +44,7 @@ function Registration() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/users/departments/');
+        const response = await axios.get('http://145.239.84.6/api/v1/users/departments/');
         setDepartments(response.data);
       } catch (error) {
         console.error('Ошибка при получении списка департаментов:', error);
@@ -71,13 +71,13 @@ function Registration() {
   }
 
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/users/registration/', values);
+    const response = await axios.post('http://145.239.84.6/api/v1/users/registration/', values);
     try{      
       const user = {
         email: event.target.email.value,
         password: event.target.password.value
       }
-      const {data} = await axios.post('http://127.0.0.1:8000/api/v1/users/login/', user ,{
+      const {data} = await axios.post('http://145.239.84.6/api/v1/users/login/', user ,{
         headers: {
           'Content-Type': 'application/json'
         }
