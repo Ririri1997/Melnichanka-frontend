@@ -1,15 +1,9 @@
 export const INITIAL_STATE = {
   goodsData: [],
-  loading: true,
-  isModalOpen: false,
-  userName: '',
-  activeStep: 1,
-  completed: {},
   sortDirection: 'asc',
   activeColumn: '',
   searchFlourName: '',
   searchBrand: '',
-  selectedRow: [],
   selectedRows: [],
 };
 
@@ -37,12 +31,6 @@ export function clientsReducer(state, action) {
       return { ...state, searchBrand: action.payload };
       case 'setSelectedRows':
        return { ...state, selectedRows: action.payload };
-   
-    // case 'setSelectedRows':
-    //   const newSelectedRows = action.payload.filter(newRow =>
-    //     !state.selectedRows.some(existingRow => existingRow.id === newRow.id)
-    //   );
-    //   return { ...state, selectedRows: [...state.selectedRows, ...newSelectedRows] };
     default:
       throw new Error();
   }

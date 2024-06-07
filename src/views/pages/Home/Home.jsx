@@ -52,8 +52,8 @@ export const Home = () => {
           ))}
         </Stepper>
       </CardWrapper>
-      {activeStep === 0 && <Clients onSelectRow={handleRowSelect} />}
-      {activeStep === 1 && <Goods onSelectRow={handleRowSelect}/>}
+      {activeStep === 0 && <Clients setStepper={setActiveStep} onSelectRow={handleRowSelect} />}
+      {activeStep === 1 && <Goods completed={completed} setCompleted={setCompleted}  setStepper={setActiveStep} onSelectRow={handleRowSelect}/>}
       {activeStep === 2 && <Delivery />}
     </>
   );

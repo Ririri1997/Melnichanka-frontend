@@ -12,7 +12,7 @@ import StyledTableCell from '../../../style/settings.styles';
 // Создаем новый стилизованный компонент на основе TableCell
 
 
-export const Clients = ({onSelectRow }) => {
+export const Clients = ({setStepper, onSelectRow }) => {
   const [{ clientsData, sortDirection, activeColumn, cities, selectedRow, isModalOpen, activeStep, completed }, dispatch] = useReducer(clientsReducer, INITIAL_STATE);
   const navigate = useNavigate();
   const [searchName, setSearchName] = useState('');
@@ -106,7 +106,7 @@ export const Clients = ({onSelectRow }) => {
   const handleTableRowClick = (row) => {
     onSelectRow(row);
     dispatch({ type: 'setSelectedRow', payload: row }); // Устанавливаем выбранную строку
-    dispatch({ type: 'setActiveStep', payload: 1 }); // Переходим на второй шаг степера
+    setStepper(1); // Переходим на второй шаг степера
   };
   
 //отсортированный массив данных
@@ -256,7 +256,11 @@ padding="32px 28px">
                 <CreateIcon fontSize="small" />
               </IconButton>
             </StyledTableCell>
-            <StyledTableCell onClick={(e) => { e.stopPropagation(); handleDeleteClick(item.id); }}>
+            <StyledTableCell
+            onClick={(e) => {
+             e.stopPropagation();
+             handleDeleteClick(item.id);
+             }}>
               <IconButton aria-label="delete" >
                 <DeleteIcon fontSize="small" />
               </IconButton>
