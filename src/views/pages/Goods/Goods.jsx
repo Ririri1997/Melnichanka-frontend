@@ -6,7 +6,7 @@ import { clientsReducer, INITIAL_STATE } from "./Goods.state";
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useReducer, useRef } from "react";
 
-export const Goods = ({ setCompleted, setStepper, onSelectRow }) => {
+export const Goods = ({ onCompleteStep, onSelectRow }) => {
  const [state, dispatch] = useReducer(clientsReducer, INITIAL_STATE);
  const {
   goodsData,
@@ -41,7 +41,7 @@ export const Goods = ({ setCompleted, setStepper, onSelectRow }) => {
     });
     const updatedData = data.map((item) => ({
      ...item,
-     sale: item.sale ?? 0,
+     discount: item.discount ?? 0,
     }));
     dispatch({ type: "setGoodsData", payload: updatedData });
    } catch (error) {
@@ -95,14 +95,8 @@ export const Goods = ({ setCompleted, setStepper, onSelectRow }) => {
  //button send
  const handleButtonClick = () => {
   onSelectRow(selectedRows);
-  setStepper((prevStep) => {
-   setCompleted((prevCompleted) => {
-    const newCompleted = [...prevCompleted];
-    newCompleted[prevStep] = true;
-    return newCompleted;
-   });
-   return prevStep + 1;
-  });
+  
+  onCompleteStep();
  };
  // columns in grid
  const columns = [
@@ -132,7 +126,7 @@ export const Goods = ({ setCompleted, setStepper, onSelectRow }) => {
    width: 108,
   },
   {
-   field: "sale",
+   field: "discount",
    headerName: "Скидка",
    type: "number",
    sortable: false,
@@ -175,7 +169,7 @@ export const Goods = ({ setCompleted, setStepper, onSelectRow }) => {
     onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
     onCellEditCommit={(params) => {
      const updatedRows = goodsData.map((row) =>
-      row.id === params.id ? { ...row, sale: params.value } : row
+      row.id === params.id ? { ...row, discount: params.value } : row
      );
      dispatch({ type: "setGoodsData", payload: updatedRows });
     }}

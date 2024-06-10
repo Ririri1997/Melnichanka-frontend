@@ -7,17 +7,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CreateIcon from '@mui/icons-material/Create';
 import axios from "axios";
 import {clientsReducer, INITIAL_STATE } from './Clients.state';
-import EditModal from "../../../components/EditModal/EditModal"; // Импортируем компонент модального окна
+import EditModal from "../../../components/EditModal/EditModal";
 import StyledTableCell from '../../../style/settings.styles';
-// Создаем новый стилизованный компонент на основе TableCell
 
 
-export const Clients = ({setStepper, onSelectRow }) => {
-  const [{ clientsData, sortDirection, activeColumn, cities, selectedRow, isModalOpen, activeStep, completed }, dispatch] = useReducer(clientsReducer, INITIAL_STATE);
+export const Clients = ({onCompleteStep, onSelectRow }) => {
+  const [{ clientsData, sortDirection, activeColumn, cities, selectedRow, isModalOpen, searchName, searchCity}, dispatch] = useReducer(clientsReducer, INITIAL_STATE);
   const navigate = useNavigate();
-  const [searchName, setSearchName] = useState('');
-  const [searchCity, setSearchCity] = useState('');
 
+console.log(clientsData);
   // выводим в таблицу все компании и города в приличном виде 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,7 +33,7 @@ export const Clients = ({setStepper, onSelectRow }) => {
               'Content-Type': 'application/json'
             }
           }),
-          axios.get('http://145.239.84.6/api/v1/city', {
+          axios.get('http://145.239.84.6/api/v1/logistics/city/', {
             headers: {
               'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
@@ -106,7 +104,7 @@ export const Clients = ({setStepper, onSelectRow }) => {
   const handleTableRowClick = (row) => {
     onSelectRow(row);
     dispatch({ type: 'setSelectedRow', payload: row }); // Устанавливаем выбранную строку
-    setStepper(1); // Переходим на второй шаг степера
+    onCompleteStep();
   };
   
 //отсортированный массив данных
@@ -173,12 +171,12 @@ const handleModalSave = async (newValues) => {
 };
 
 const findName = (text) => {
- setSearchName(text.toLowerCase());
+ dispatch({ type: "setSearchName", payload: text.toLowerCase() });
 };
 
 
 const findCity = (text) => {
- setSearchCity(text.toLowerCase());
+ dispatch({ type: "setSearchCity", payload: text.toLowerCase() });
 };
 return (
 <CardWrapper 
@@ -249,9 +247,9 @@ padding="32px 28px">
           onClick={() => handleTableRowClick(item)}
           >
             <TableCell>{item.client_name}</TableCell>
-            <TableCell>{renderCityName(item.destination_city)}</TableCell>
+            <TableCell>{item.destination_city}</TableCell>
             <TableCell>{item.contract_number}</TableCell>
-            <StyledTableCell onClick={(e) => { e.stopPropagation(); handleRenameClick(item); }}>
+            <StyledTableCell onClick={(e) => { e.stopPropagation(); handleRenameClick(item);}}>
             <IconButton aria-label="create" >
                 <CreateIcon fontSize="small" />
               </IconButton>
