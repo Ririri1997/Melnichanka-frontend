@@ -7,8 +7,8 @@ export const INITIAL_STATE = {
  selectedRow: null,
  isModalOpen: false,
  userName: '',
- activeStep: 0,
- completed: {},
+ searchName: '',
+ searchCity: '',
 };
 
 export function clientsReducer(state, action) {
@@ -29,13 +29,14 @@ export function clientsReducer(state, action) {
      return { ...state, isModalOpen: action.payload };
    case 'setUserName':
      return { ...state, userName: action.payload };
-   case 'setActiveStep':
-     return { ...state, activeStep: action.payload };
-   case 'setCompleted':
-     return { ...state, completed: action.payload };
    case 'setNewClients':
     return { ...state, isModalOpen: true, selectedRow: false };
-   default:
+   
+    case 'setSearchCity':
+      return { ...state, searchCity: action.payload };
+    case 'setSearchName':
+      return { ...state, searchName: action.payload };
+      default:
      throw new Error();
  }
 }

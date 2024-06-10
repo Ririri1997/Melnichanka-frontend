@@ -1,14 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import CardWrapper from '../../../components/CardWrapper/CardWrapper';
 import React, { useEffect, useReducer } from "react";
-import {Button, IconButton,  Grid, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, EditModal } from '@mui/material';
-import { SpanBold } from "../../../style/settings.styles";
-import DeleteIcon from '@mui/icons-material/Delete';
-import CreateIcon from '@mui/icons-material/Create';
+import {FormControl, FormLabel,  RadioGroup, FormControlLabel, Radio, Button} from '@mui/material';
 import axios from "axios";
-import StyledTableCell from '../../../style/settings.styles';
-// Создаем новый стилизованный компонент на основе TableCell
-import { DataGrid } from '@mui/x-data-grid';
+
 
 
 export const Delivery = ({onSelectRow }) => {
@@ -31,7 +26,7 @@ useEffect(() => {
       }
 
       const {data} = await 
-        axios.get('http://145.239.84.6/api/v1/rwtrip/', {
+        axios.get('http://145.239.84.6/api/v1/logistics/factories/', {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
@@ -57,7 +52,20 @@ return (
 borderRadius="medium" 
 width="medium" 
 padding="32px 28px">
- <p>Выбери что-то</p>
+ <FormControl component="fieldset">
+  <FormLabel component="legend">Выбери способ доставки</FormLabel>
+  <RadioGroup aria-label="dilivery" name="dilivery" >
+    <FormControlLabel value="self" control={<Radio />} label="Самовывоз" />
+    <FormControlLabel value="auto" control={<Radio />} label="Авто" />
+    <FormControlLabel value="train" control={<Radio />} label="ЖД" />
+  </RadioGroup>
+  
+  <Button variant="contained" onClick={()=>{
+   console.log('click');
+  }} color="primary">
+          {'Продолжить'}
+        </Button>
+</FormControl>
   </CardWrapper> 
   );
 };
