@@ -11,7 +11,7 @@ export const Logout = () => {
     useEffect(() => {
         (async () => {
             try {
-                await axios.post('http://127.0.0.1:8000/api/v1/users/logout/',{
+                await axios.post('http://145.239.84.6/api/v1/users/logout/',{
                 refresh_token: localStorageTokenRefresh
                 } ,{headers: {
                     'Content-Type': 'application/json',

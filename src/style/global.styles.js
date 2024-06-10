@@ -10,7 +10,8 @@ const GlobalStyled = createGlobalStyle`
   }
 
   body {
-   background: pink;
+   background: url('img/bg.png') #F2F2F2;
   }
+  
 `
 export default GlobalStyled;

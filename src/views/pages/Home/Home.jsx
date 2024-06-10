@@ -1,48 +1,60 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import CardForm from '../../../components/CardForm/CardForm';
-import Button from "@mui/material/Button";
-import {useNavigate } from 'react-router-dom'
-
+import React, { useState } from "react";
+import CardWrapper from '../../../components/CardWrapper/CardWrapper';
+import { Stepper, Step, StepButton } from '@mui/material';
+import Header from '../../containers/Header/Header';
+import { Clients } from '../../containers/Clients/Clients';
+import { Goods } from '../Goods/Goods';
+import { Delivery } from "../Delivery/Delivery";
+function getSteps() {
+  return ['Компании', 'Товары', 'Способ доставки', 'Скачивание'];
+}
 
 export const Home = () => {
-  const [message, setMessage] = useState('');
+  const [activeStep, setActiveStep] = useState(0);
+  const [completed, setCompleted] = useState([false, false, false, false]);
 
-  const navigate = useNavigate();
-  useEffect(() => {
-    const fetchHomeData = async () => {
-      try {
-        const accessToken = localStorage.getItem('access_token');
-        if (!accessToken) {
-          navigate( '/login'); 
-          return;
-        }
+  const steps = getSteps();
 
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/home/', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
+  const handleStep = (step) => () => {
+    setActiveStep(step);
+  };
 
-        setMessage(response.data.message);
-      } catch (error) {
-        console.error('Error fetching home data:', error);
-        if (error.response && error.response.status === 401) {
-          navigate( '/login'); 
-        }
-      }
-    };
-
-    fetchHomeData();
-  }, [navigate]);
+  const handleRowSelect = (row) => {
+    setActiveStep(1);
+    setCompleted((prevCompleted) => {
+      const newCompleted = [...prevCompleted];
+      newCompleted[0] = true; // Устанавливаем первый шаг как выполненный
+      return newCompleted;
+    });
+    console.log('Selected row:', row);
+  };
 
   return (
-    <CardForm title={`Hi ${message}`}>
-      <p> Этот текст видят только авторизованные людишки</p>
-        <Button variant="contained" href="/logout">Дохлебывай и уходи</Button>
-        
-      </CardForm>
-
+    <>
+      <Header />
+      <CardWrapper
+        borderRadius="medium"
+        width="medium"
+        marginBottom="20px"
+        padding='24px 28px'>
+        <Stepper
+          nonLinear
+          activeStep={activeStep}
+          style={{ width: '100%' }}>
+          {steps.map((label, index) => (
+            <Step key={label} completed={completed[index]}>
+              <StepButton
+                  onClick={handleStep(index)} // отвечает за кликабельность элементов степпера 
+                  completed={completed[index].toString()}>
+                  {label}
+              </StepButton>
+            </Step>
+          ))}
+        </Stepper>
+      </CardWrapper>
+      {activeStep === 0 && <Clients setStepper={setActiveStep} onSelectRow={handleRowSelect} />}
+      {activeStep === 1 && <Goods completed={completed} setCompleted={setCompleted}  setStepper={setActiveStep} onSelectRow={handleRowSelect}/>}
+      {activeStep === 2 && <Delivery />}
+    </>
   );
 };
