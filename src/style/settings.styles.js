@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-
 import TableCell from '@mui/material/TableCell';
 import {styled as styledMui } from '@mui/system';
 
@@ -20,6 +19,8 @@ export const SpanBold = styled.span`
   line-height: 24px;
   text-align: center;
 `
+
+
 
 
 // Создаем новый стилизованный компонент на основе TableCell
