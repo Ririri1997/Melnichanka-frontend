@@ -20,17 +20,13 @@ import axios from "axios";
 import { deliveryReducer, INITIAL_STATE } from "./Delivery.state";
 import "./Delivery.css";
 
-export const Delivery = () => {
+export const Delivery = ({railwayStation}) => {
  const navigate = useNavigate();
  const [state, dispatch] = useReducer(deliveryReducer, INITIAL_STATE);
- const [inputAddress, setInputAddress] = useState("");
- const [cleanedAddress, setCleanedAddress] = useState(null);
 
- const { factories, activeFactories, isDisabled, deliveryType } = state;
 
- useEffect(() => {
-  console.log(cleanedAddress);
- }, [deliveryType, cleanedAddress]);
+ const { factories, activeFactories, isDisabled, deliveryType, inputAddress } = state;
+
 
  useEffect(() => {
   const fetchData = async () => {
@@ -71,9 +67,10 @@ export const Delivery = () => {
  };
 
  const handleSelect = (suggestion) => {
-  setInputAddress(suggestion);
-  setCleanedAddress(suggestion);
+  dispatch({ type: "setInputAddress", payload: suggestion });
  };
+
+console.log(inputAddress);
 
  return (
   <CardWrapper
@@ -96,6 +93,13 @@ export const Delivery = () => {
     </RadioGroup>
 
     {deliveryType === "self" && (
+     
+     <Grid
+     container
+     justifyContent="space-between"
+     alignItems="center"
+     gap={"12px"}
+    >
       <FormControl variant="outlined" sx={{width: '266px'}}>
        <InputLabel id="factories">Фабрика</InputLabel>
        <Select
@@ -112,6 +116,7 @@ export const Delivery = () => {
         ))}
        </Select>
       </FormControl>
+      </Grid>
     )}
     {deliveryType === "auto" && (
       <Grid
@@ -205,7 +210,7 @@ export const Delivery = () => {
           <FormControl variant="outlined" fullWidth>
            
              <TextField
-              value='Text station'
+              value={railwayStation}
               fullWidth
               margin="dense"
               label="Адрес"

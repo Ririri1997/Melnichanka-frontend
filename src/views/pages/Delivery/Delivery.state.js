@@ -3,6 +3,7 @@ export const INITIAL_STATE = {
  activeFactories: '',
  isDisabled: true,
  deliveryType: "self",
+ inputAddress: ''
 };
 
 export function deliveryReducer(state, action) {
@@ -15,7 +16,9 @@ export function deliveryReducer(state, action) {
    return { ...state, isDisabled: action.payload };
    case 'setDeliveryType':
     return { ...state, deliveryType: action.payload };
-
+    case 'setInputAddress':
+     return { ...state, inputAddress: action.payload };
+ 
   default:
    throw new Error();
  }
