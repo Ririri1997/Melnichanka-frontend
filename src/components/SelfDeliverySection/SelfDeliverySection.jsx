@@ -2,8 +2,8 @@ import React from "react";
 import { Grid} from "@mui/material";
 import SelectFactory from "../SelectFactory/SelectFactory";
 
-const SelfDeliverySection = ({ factories, factoryId, handleFactoryChange }) => {
- return (
+const SelfDeliverySection = ({ factories, handleFactoryChange }) => {
+  return (
   <Grid
    container
    justifyContent="space-between"
@@ -11,7 +11,7 @@ const SelfDeliverySection = ({ factories, factoryId, handleFactoryChange }) => {
    gap={"12px"}
    sx={{ marginBottom: "20px" }}
   >
-   <SelectFactory factories={factories} factoryId={factoryId} handleFactoryChange={handleFactoryChange}/>
+   <SelectFactory factories={factories} handleFactoryChange={handleFactoryChange}/>
   </Grid>
  );
 };

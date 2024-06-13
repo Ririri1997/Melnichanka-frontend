@@ -1,14 +1,17 @@
-import React from "react";
+import React, {useContext} from "react";
 import { Grid, FormControl, TextField } from "@mui/material";
 import SelectFactory from "../SelectFactory/SelectFactory";
+import { HomeContext } from "../../context/Home.context";
 
 const TrainDeliverySection = ({
  factories,
- factoryId,
- railwayStation,
+ 
  handleFactoryChange,
  handleDeliveryCost
 }) => {
+ 
+ const { state: homeState} = useContext(HomeContext);
+ const {railwayStation} = homeState;
  return (
   <Grid
    container
@@ -17,7 +20,6 @@ const TrainDeliverySection = ({
    sx={{ marginBottom: "16px" }}
   >
    <SelectFactory
-    factoryId={factoryId}
     handleFactoryChange={handleFactoryChange}
     factories={factories}
    />

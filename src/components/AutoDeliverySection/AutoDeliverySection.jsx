@@ -11,7 +11,7 @@ const AutoDeliverySection = ({factoryId, handleFactoryChange, factories, inputAd
    gap={"12px"}
    sx={{ marginBottom: "16px" }}
   >
- <SelectFactory factoryId={factoryId} handleFactoryChange={handleFactoryChange} factories={factories}/> 
+ <SelectFactory handleFactoryChange={handleFactoryChange} factories={factories}/> 
 
    <Grid item width={"266px"}>
     <FormControl variant="outlined" fullWidth>

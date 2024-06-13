@@ -1,7 +1,13 @@
-import React from "react";
+import React, {useContext} from "react";
 import { Grid, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
-const SelectFactory = ({ factoryId, handleFactoryChange, factories }) => {
+import { HomeContext } from "../../context/Home.context";
+const SelectFactory = ({ handleFactoryChange, factories }) => {
+
+
+ const { state: homeState } = useContext(HomeContext);
+ const {factoryId} = homeState;
+
  return (
   <Grid item width={"266px"} sx={{ marginTop: "8px" }}>
    <FormControl variant="outlined" fullWidth>

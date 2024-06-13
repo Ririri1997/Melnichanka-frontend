@@ -1,4 +1,3 @@
-// import Home from './views/pages/Home/Home'
 import Login from './views/pages/Login/Login';
 import GlobalStyled from './style/global.styles';
 import Registration from './views/pages/Registration/Registration';
