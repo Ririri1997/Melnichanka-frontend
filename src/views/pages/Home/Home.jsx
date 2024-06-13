@@ -75,7 +75,7 @@ export const Home = () => {
      onSelectRow={handleRowSelect}
     />
    )}
-   {activeStep === 2 && <Delivery railwayStation={railwayStation}/>}
+   {activeStep === 2 && <Delivery railwayStation={railwayStation} onSelectRow={handleRowSelect}/>}
   </>
  );
 };

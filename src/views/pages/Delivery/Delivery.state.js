@@ -1,25 +1,28 @@
 export const INITIAL_STATE = {
  factories: [],
- activeFactories: '',
  isDisabled: true,
- deliveryType: "self",
- inputAddress: ''
+ deliveryType: "",
+ inputAddress: "",
+ inputFullAdress: '0',
+ factoryId: "",
 };
 
-export function deliveryReducer(state, action) {
+export const deliveryReducer = (state, action) => {
  switch (action.type) {
-  case 'setFactoriesData':
-   return { ...state, factories: action.payload };
-  case 'setActiveFactories':
-   return { ...state, activeFactories: action.payload };
-  case 'setIsDisabled':
-   return { ...state, isDisabled: action.payload };
-   case 'setDeliveryType':
-    return { ...state, deliveryType: action.payload };
-    case 'setInputAddress':
-     return { ...state, inputAddress: action.payload };
- 
-  default:
-   throw new Error();
+   case "setFactoriesData":
+     return { ...state, factories: action.payload };
+   case "setDeliveryType":
+     return { ...state, deliveryType: action.payload };
+   case "setFactoryId":
+     return { ...state, factoryId: action.payload };
+   case "setInputAddress":
+    const fullAdress = action.payload.data.city_with_type+ ', ' + action.payload.data.region_with_type
+     return { ...state, inputAddress: action.payload,
+      inputFullAdress: fullAdress
+      };
+   case "setIsDisabled":
+     return { ...state, isDisabled: action.payload };
+   default:
+     return state;
  }
-}
+};
