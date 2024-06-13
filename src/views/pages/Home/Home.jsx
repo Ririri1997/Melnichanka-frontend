@@ -6,6 +6,7 @@ import { Clients } from "../../containers/Clients/Clients";
 import { Goods } from "../Goods/Goods";
 import { Delivery } from "../Delivery/Delivery";
 import { INITIAL_STATE, homeReducer } from "./Home.state";
+import Download from "../Download/Download";
 
 function getSteps() {
  return ["Компании", "Товары", "Способ доставки", "Скачивание"];
@@ -13,7 +14,10 @@ function getSteps() {
 
 export const Home = () => {
  const [state, dispatch] = useReducer(homeReducer, INITIAL_STATE);
- const { activeStep, completed, railwayStation } = state;
+ const { activeStep, completed, railwayStation, 
+  selectedGoods,
+  selectedClients,
+  deliveryInfo,} = state;
 
  const steps = getSteps();
 
@@ -32,15 +36,14 @@ export const Home = () => {
   dispatch({ type: "setActiveStep", payload: step });
  };
 
+
  const handleRowSelect = (row) => {
   console.log("Selected row:", row);
-  if(activeStep === 0){
-   dispatch({ type: "setRailwayStation", payload: row.railway_station });
-   console.log(railwayStation);
-
+  if (activeStep === 0) {
+    dispatch({ type: "setRailwayStation", payload: row.railway_station });
+    console.log(railwayStation);
   }
- };
-
+};
  return (
   <>
    <Header />
@@ -75,7 +78,20 @@ export const Home = () => {
      onSelectRow={handleRowSelect}
     />
    )}
-   {activeStep === 2 && <Delivery railwayStation={railwayStation} onSelectRow={handleRowSelect}/>}
+   {activeStep === 2 && (
+    <Delivery
+     railwayStation={railwayStation}
+     onCompleteStep={() => handleComplete(2)}
+     onSelectRow={handleRowSelect}
+    />
+   )}
+   {activeStep === 3 && (
+    <Download
+      selectedGoods={selectedGoods}
+      selectedClients={selectedClients}
+      deliveryInfo={deliveryInfo}
+    />
+  )}
   </>
  );
 };

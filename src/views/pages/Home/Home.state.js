@@ -1,9 +1,13 @@
 export const INITIAL_STATE = {
  activeStep: 0,
  completed: [false, false, false, false],
- railwayStation: ''
+ deliveryType: "self",
+ inputFullAddress: 0,
+ factoryId: "",
+ deliveryCost: 0,
+ selectedGoods: [], 
+ selectedClients: [], 
 };
-
 export function homeReducer(state, action) {
  switch (action.type) {
   case "setActiveStep":

@@ -11,7 +11,7 @@ const StyledCardWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   place-items: ${(props)=> props.$justify || 'center'};
-  gap: 24px;
+  gap: ${(props)=> props.$gap || '24px'} ;
   margin-bottom: ${(props) => props.$marginBottom || '0px'};
 `;
 
