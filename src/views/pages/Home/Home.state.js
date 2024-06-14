@@ -45,9 +45,13 @@ export function homeReducer(state, action) {
    return { ...state, selectedGoods: action.payload };
   case "setSelectedClients":
    return { ...state, selectedClients: action.payload };
-
   case "setDeliveryType":
-   return { ...state, deliveryType: action.payload };
+   return { ...state,
+    deliveryType: action.payload,
+    factoryId: "", 
+    inputFullAddress: 0,
+    deliveryCost: 0
+   };
   case "setFactoryId":
    return { ...state, factoryId: action.payload };
   case "setInputFullAddress":

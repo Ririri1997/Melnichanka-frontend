@@ -1,7 +1,6 @@
 export const INITIAL_STATE = {
  factories: [],
  isDisabled: true,
- // deliveryType: "self",
  inputAddress: 0,
  inputFullAddress: 0,
  factoryId: "",
@@ -12,10 +11,6 @@ export const deliveryReducer = (state, action) => {
  switch (action.type) {
   case "setFactoriesData":
    return { ...state, factories: action.payload };
-  // case "setDeliveryType":
-  //  return { ...INITIAL_STATE,
-  //   factories: state.factories,
-  //   deliveryType: action.payload };
   case "setFactoryId":
    return { ...state, factoryId: action.payload };
   case "setInputAddress":
