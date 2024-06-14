@@ -19,16 +19,23 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
  const navigate = useNavigate();
  const { state: homeState, dispatch: homeDispatch } = useContext(HomeContext);
  const [state, dispatch] = useReducer(deliveryReducer, deliveryInitialState);
- const {
-  factories,
-  isDisabled,
-  // deliveryType,
-  inputAddress,
-  // factoryId,
-  deliveryCost,
-  inputFullAddress,
- } = state;
- const { deliveryType, factoryId } = homeState;
+ const { factories, isFormReadyToSubmit} =
+  state;
+ const { deliveryType, factoryId, deliveryCost, inputAddress, inputFullAddress  } = homeState;
+
+ useEffect(() => {
+  const isSelfDeliveryReady = deliveryType === "self" && factoryId;
+  const isAutoDeliveryReady =
+   deliveryType !== "self" && factoryId && deliveryCost && inputFullAddress;
+  const isTainDeliveryReady =
+   deliveryType !== "self" && factoryId && deliveryCost;
+
+  if (isSelfDeliveryReady || isTainDeliveryReady || isAutoDeliveryReady) {
+   dispatch({ type: "setIsFormReadyToSubmit", payload: true });
+  } else {
+   dispatch({ type: "setIsFormReadyToSubmit", payload: false });
+  }
+ }, [factoryId, deliveryType, deliveryCost, inputFullAddress]);
 
  useEffect(() => {
   const fetchData = async () => {
@@ -38,7 +45,6 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
      navigate("/login");
      return;
     }
-
     const { data } = await axios.get(
      "http://145.239.84.6/api/v1/logistics/factories/",
      {
@@ -65,12 +71,10 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
 
  const handleFactoryChange = (value) => {
   homeDispatch({ type: "setFactoryId", payload: value });
-
-  dispatch({ type: "setIsDisabled", payload: false });
  };
 
  const handleSelect = (suggestion) => {
-  dispatch({ type: "setInputAddress", payload: suggestion });
+  homeDispatch({ type: "setInputAddress", payload: suggestion });
  };
 
  const handleDeliveryCost = (cost) => {
@@ -119,7 +123,7 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
     />
    )}
    <Button
-    disabled={isDisabled}
+    disabled={!isFormReadyToSubmit}
     variant="contained"
     onClick={handleCompleteStep}
     color="primary"

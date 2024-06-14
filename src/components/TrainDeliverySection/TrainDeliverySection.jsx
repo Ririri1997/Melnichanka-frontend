@@ -5,13 +5,12 @@ import { HomeContext } from "../../context/Home.context";
 
 const TrainDeliverySection = ({
  factories,
- 
  handleFactoryChange,
  handleDeliveryCost
 }) => {
  
  const { state: homeState} = useContext(HomeContext);
- const {railwayStation} = homeState;
+ const {selectedClients} = homeState;
  return (
   <Grid
    container
@@ -27,7 +26,7 @@ const TrainDeliverySection = ({
    <Grid item width={"266px"}>
     <FormControl variant="outlined" fullWidth>
      <TextField
-      value={railwayStation}
+      value={selectedClients.railway_station}
       fullWidth
       margin="dense"
       label="Станция получения"
@@ -43,7 +42,9 @@ const TrainDeliverySection = ({
      margin="dense"
      type="number"
      label="Стоимость доставки"
-     onChange={(e)=>handleDeliveryCost(e.target.value)}
+     onChange={(e)=>{handleDeliveryCost(e.target.value)
+      console.log(e.target.value);
+     }}
     />
    </Grid>
   </Grid>

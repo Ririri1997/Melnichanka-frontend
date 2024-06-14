@@ -16,9 +16,18 @@ function getSteps() {
 
 export const Home = () => {
   const [state, dispatch] = useReducer(homeReducer, INITIAL_STATE);
-  const { activeStep, completed, railwayStation, selectedGoods, selectedClients, deliveryInfo, deliveryCost, inputFullAddress, factoryId, deliveryType} = state;
+  const { activeStep, completed, selectedGoods, selectedClients, deliveryInfo, deliveryCost, inputFullAddress, factoryId, deliveryType} = state;
+  const ids = selectedGoods.map(item => item.id);
+ const sendData = {
+  "delivery_type": deliveryType,
+  "client_id": selectedClients.id,
+  "items": [],
+    "factory_id": factoryId,
+    "destination": inputFullAddress,
+    "delivery_cost": deliveryCost
+ }
 
-  const steps = getSteps();
+ const steps = getSteps();
 
   const handleComplete = (step) => {
     const newCompleted = [...completed];
@@ -38,10 +47,15 @@ export const Home = () => {
   const handleRowSelect = (row) => {
     console.log("Selected row:", row);
     if (activeStep === 0) {
-      dispatch({ type: "setRailwayStation", payload: row.railway_station });
+      dispatch({ type: "setSelectedClients", payload: row});
+    }
+    if (activeStep === 1) {
+      dispatch({ type: "setSelectedGoods", payload: row});
+      console.log(row);
     }
   };
-console.log(deliveryCost, inputFullAddress, factoryId, deliveryType);
+
+
   return (
     <HomeContext.Provider value={{ state, dispatch }}>
       <Header />
@@ -63,7 +77,7 @@ console.log(deliveryCost, inputFullAddress, factoryId, deliveryType);
         <Goods onCompleteStep={() => handleComplete(1)} onSelectRow={handleRowSelect} />
       )}
       {activeStep === 2 && (
-        <Delivery railwayStation={railwayStation} onCompleteStep={() => handleComplete(2)} />
+        <Delivery onCompleteStep={() => handleComplete(2)} />
       )}
       {activeStep === 3 && (
         <Download

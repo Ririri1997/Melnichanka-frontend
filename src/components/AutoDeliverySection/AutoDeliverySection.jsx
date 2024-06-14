@@ -3,7 +3,7 @@ import { Grid, FormControl, TextField } from "@mui/material";
 import {AddressSuggestions} from "react-dadata";
 import SelectFactory from "../SelectFactory/SelectFactory";
 
-const AutoDeliverySection = ({factoryId, handleFactoryChange, factories, inputAddress, handleSelect, handleDeliveryCost}) => {
+const AutoDeliverySection = ({ handleFactoryChange, factories, inputAddress, handleSelect, handleDeliveryCost}) => {
  return (
   <Grid
    container
