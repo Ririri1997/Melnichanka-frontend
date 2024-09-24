@@ -3,6 +3,8 @@ import { FormControl, FormHelperText, MenuItem, InputLabel, Select, TextField, B
 import Form from '../Form/Form';
 import { formReducer, INITIAL_STATE } from './EditModal.state';
 import axios from 'axios';
+import { PREFIX } from '../../helpers/API';
+
 
 const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => {
   const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
@@ -23,7 +25,7 @@ const EditModal = ({ isOpen, onClose, onSave, rowData, cities, isCreating }) => 
   useEffect(() => {
     const fetchPositions = async () => {
       try {
-        const response = await axios.get('http://145.239.84.6/api/v1/clients/directorposition/', {
+        const response = await axios.get(`${PREFIX}clients/directorposition/`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
             'Content-Type': 'application/json'
@@ -194,7 +196,7 @@ export default EditModal;
 //   useEffect(() => {
 //     const fetchPositions = async () =>{
 //       try {
-//         const response = await axios.get('http://145.239.84.6/api/v1/clients/directorposition/');
+//         const response = await axios.get(`${PREFIX}clients/directorposition/`);
 //         setPositions(response.data);
 //       } catch (error){
 //         console.error('Ошибка при получении списка позиций директора : ', error)

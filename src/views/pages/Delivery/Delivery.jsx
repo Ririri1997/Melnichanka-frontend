@@ -14,6 +14,9 @@ import SelfDeliverySection from "../../../components/SelfDeliverySection/SelfDel
 import AutoDeliverySection from "../../../components/AutoDeliverySection/AutoDeliverySection";
 import TrainDeliverySection from "../../../components/TrainDeliverySection/TrainDeliverySection";
 import { HomeContext } from "../../../context/Home.context";
+import { PREFIX } from "../../../helpers/API";
+import { getAccessToken } from "../../../utils/authService";
+
 
 export const Delivery = ({ onSelectRow, onCompleteStep }) => {
  const navigate = useNavigate();
@@ -22,6 +25,8 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
  const { factories, isFormReadyToSubmit} =
   state;
  const { deliveryType, factoryId, deliveryCost, inputAddress, inputFullAddress  } = homeState;
+
+
 
  useEffect(() => {
   const isSelfDeliveryReady = deliveryType === "self" && factoryId;
@@ -36,17 +41,17 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
    dispatch({ type: "setIsFormReadyToSubmit", payload: false });
   }
  }, [factoryId, deliveryType, deliveryCost, inputFullAddress]);
+ const accessToken = getAccessToken();
 
  useEffect(() => {
   const fetchData = async () => {
    try {
-    const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
      navigate("/login");
      return;
     }
     const { data } = await axios.get(
-     "http://145.239.84.6/api/v1/logistics/factories/",
+     `${PREFIX}logistics/factories/`,
      {
       headers: {
        Authorization: `Bearer ${accessToken}`,
@@ -63,7 +68,7 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
    }
   };
   fetchData();
- }, [navigate]);
+ }, [navigate, accessToken]);
 
  const handleDeliveryChange = (event) => {
   homeDispatch({ type: "setDeliveryType", payload: event.target.value });
@@ -82,7 +87,7 @@ export const Delivery = ({ onSelectRow, onCompleteStep }) => {
  };
 
  const handleCompleteStep = () => {
-  homeDispatch({ type: "setDeliveryType", payload: deliveryType });
+  // homeDispatch({ type: "setDeliveryType", payload: deliveryType });
   homeDispatch({ type: "setFactoryId", payload: factoryId });
   homeDispatch({ type: "setInputFullAddress", payload: inputFullAddress });
   onCompleteStep();

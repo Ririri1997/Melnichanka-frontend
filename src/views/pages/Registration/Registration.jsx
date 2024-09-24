@@ -15,8 +15,11 @@ import axios from "axios";
 import InputMask from "react-input-mask";
 import { useNavigate } from "react-router-dom";
 import { formReducer, INITIAL_STATE } from "./Registration.state";
+import { saveTokens, clearTokens } from "../../../utils/authService";
 
+import { PREFIX } from "../../../helpers/API";
 function Registration() {
+
  const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
  const { isValidText, values, isFormReadyToSubmit } = formState;
  const [departments, setDepartments] = useState([]);
@@ -40,7 +43,7 @@ function Registration() {
   const fetchPositions = async () => {
    try {
     const response = await axios.get(
-     "http://145.239.84.6/api/v1/users/positions/"
+     `${PREFIX}users/positions/`
     );
     setPositions(response.data);
    } catch (error) {
@@ -54,7 +57,7 @@ function Registration() {
   const fetchDepartments = async () => {
    try {
     const response = await axios.get(
-     "http://145.239.84.6/api/v1/users/departments/"
+      `${PREFIX}users/departments/`
     );
     setDepartments(response.data);
    } catch (error) {
@@ -67,78 +70,73 @@ function Registration() {
  // Функция для обработки отправки формы
  const handleFormSubmit = async (event) => {
   event.preventDefault();
+
   onChange(event.target.name, event.target.value);
+
+  // Устанавливаем локальные ошибки для каждого поля
   setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   full_name: isValidText.full_name,
-  }));
-  setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   phone_number_personal: isValidText.phone_number_personal,
-  }));
-  setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   phone_number_work: isValidText.phone_number_work,
-  }));
-  setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   department: isValidText.department,
-  }));
-  setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   position: isValidText.position,
-  }));
-  setLocalErrors((prevErrors) => ({ ...prevErrors, email: isValidText.email }));
-  setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   password_confirm: isValidText.password_confirm,
-  }));
-  setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   password: isValidText.password,
+    ...prevErrors,
+    full_name: isValidText.full_name,
+    phone_number_personal: isValidText.phone_number_personal,
+    phone_number_work: isValidText.phone_number_work,
+    department: isValidText.department,
+    position: isValidText.position,
+    email: isValidText.email,
+    password_confirm: isValidText.password_confirm,
+    password: isValidText.password,
   }));
 
+  // Проверка на готовность формы
   if (!isFormReadyToSubmit) {
-   return;
+    return;
   }
 
   try {
-   const response = await axios.post(
-    "http://145.239.84.6/api/v1/users/registration/",
-    values
-   );
-   try {
-    const user = {
-     email: event.target.email.value,
-     password: event.target.password.value,
-    };
-    const { data } = await axios.post(
-     "http://145.239.84.6/api/v1/users/login/",
-     user,
-     {
-      headers: {
-       "Content-Type": "application/json",
-      },
-     },
-     {
-      withCredentials: true,
-     }
+    // Отправляем данные регистрации
+    const response = await axios.post(
+      `${PREFIX}users/registration/`,
+      values
     );
-    localStorage.clear();
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
-    axios.defaults.headers.common["Authorization"] = `Bearer ${data["access"]}`;
-   } catch (error) {
-    // console.error('An error occurred while logging in:', error);
-    setServerErrors({ error: error.response.data.detail });
-   }
-   navigate("/", { replace: true });
-   event.target.reset();
+
+    // Авторизация после успешной регистрации
+    const user = {
+      email: event.target.email.value,
+      password: event.target.password.value,
+    };
+
+    try {
+      const { data } = await axios.post(
+        `${PREFIX}users/login/`,
+        user,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      // Очищаем старые токены и сохраняем новые с помощью authService
+      clearTokens();
+      saveTokens(data.access, data.refresh);
+
+      // Переадресация на главную страницу после успешной авторизации
+      navigate("/", { replace: true });
+
+      // Сброс формы
+      event.target.reset();
+    } catch (error) {
+      // Обработка ошибок при авторизации
+      setServerErrors({ error: error.response.data.detail });
+    }
   } catch (error) {
-   // console.error('Error sending data to backend:', error);
-   setServerErrors(error.response.data);
+    // Обработка ошибок при регистрации
+    setServerErrors(error.response.data);
   }
- };
+};
+
  return (
   <StyledRegistration>
    <CardWrapper title="Регистрация" padding="48px 32px">

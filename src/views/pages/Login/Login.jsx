@@ -7,109 +7,109 @@ import { TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formReducer, INITIAL_STATE } from "./Login.state";
+import { PREFIX } from "../../../helpers/API";
+
+
 
 const Login = () => {
- const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
- const { isValidText, values, isFormReadyToSubmit } = formState;
- const [serverErrors, setServerErrors] = useState({});
- const [localErrors, setLocalErrors] = useState({});
- const navigate = useNavigate();
- const location = useLocation();
+  const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
+  const { isValidText, values, isFormReadyToSubmit } = formState;
+  const [serverErrors, setServerErrors] = useState({});
+  const [localErrors, setLocalErrors] = useState({});
+  const navigate = useNavigate();
+  const location = useLocation();
 
-console.log(values);
- useEffect(() => {
+  useEffect(() => {
+    dispatchForm({ type: "SUBMIT", values });
+    setLocalErrors({
+      email: isValidText.email,
+      password: isValidText.password,
+    });
+  }, [values]);
 
-  dispatchForm({ type: "SUBMIT", values });
-  setLocalErrors({
-   email: isValidText.email,
-   password: isValidText.password,
-  });
- }, [values]);
-
-
-
- const fromPage = location.state?.from?.pathname || "/";
-
- const onChange = (e) => {
-  dispatchForm({
-   type: "SET_VALUE",
-   payload: { [e.target.name]: e.target.value },
-  });
-  dispatchForm({
-   type: "SUBMIT",
-   values: { ...values, [e.target.name]: e.target.value },
-  });
-  setLocalErrors((prevErrors) => ({
-   ...prevErrors,
-   [e.target.name]: isValidText[e.target.name],
-  }));
- };
+  const fromPage = location.state?.from?.pathname || "/";
 
 
-const submit = async (e) => {
- e.preventDefault();
+  const onChange = (e) => {
+    dispatchForm({
+      type: "SET_VALUE",
+      payload: { [e.target.name]: e.target.value },
+    });
+    dispatchForm({
+      type: "SUBMIT",
+      values: { ...values, [e.target.name]: e.target.value },
+    });
+    setLocalErrors((prevErrors) => ({
+      ...prevErrors,
+      [e.target.name]: isValidText[e.target.name],
+    }));
+  };
 
- setLocalErrors({ email: isValidText.email, password: isValidText.password });
+  const submit = async (e) => {
+    e.preventDefault();
 
- if (!isFormReadyToSubmit) {
-   console.log("Form is not ready to submit:", !isFormReadyToSubmit);
-   return;
- }
- try {
-  const { data } = await axios.post(
-    "http://145.239.84.6/api/v1/users/login/",
-    values,
-    {
-      headers: { "Content-Type": "application/json" },
-      withCredentials: true,
+    setLocalErrors({ email: isValidText.email, password: isValidText.password });
+
+    if (!isFormReadyToSubmit) {
+      console.log("Form is not ready to submit:", !isFormReadyToSubmit);
+      return;
     }
-  );
 
-  localStorage.clear();
-  localStorage.setItem("access_token", data.access);
-  localStorage.setItem("refresh_token", data.refresh);
-  axios.defaults.headers.common["Authorization"] = `Bearer ${data.access}`;
-  navigate(fromPage, { replace: true });
-} catch (error) {
-  console.error("Error during login:", error); // Логирование ошибки
-  setServerErrors({ error: error.response.data.detail });
-  // Другие действия при ошибке, но без перезагрузки страницы
-}
-};
- return (
-  <StyledLogin>
-   <CardWrapper title="Авторизация" padding="48px 32px">
-    <Form onFormSubmit={submit}>
-     <TextField
-      variant="outlined"
-      id="email"
-      label="Логин"
-      placeholder="email"
-      name="email"
-      onChange={onChange}
-      error={!!localErrors.email || !!serverErrors.email}
-      helperText={localErrors.email || serverErrors.email || ""}
-     />
-     <TextField
-      variant="outlined"
-      id="password"
-      label="Введите пароль"
-      placeholder="password"
-      type="password"
-      name="password"
-      onChange={onChange}
-      error={!!localErrors.password || !!serverErrors.error}
-      helperText={localErrors.password || serverErrors.error || ""}
-     />
-     <Button variant="contained" type="submit">
-      Войти
-     </Button>
-    </Form>
-   </CardWrapper>
-  </StyledLogin>
- );
+    try {
+      const { data } = await axios.post(
+        `${PREFIX}users/login/`,
+        values,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+
+      // Очищаем и сохраняем токены
+      localStorage.clear();
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("refresh_token", data.refresh);
+
+      // Перенаправляем на предыдущую страницу
+      navigate(fromPage, { replace: true });
+    } catch (error) {
+      console.error("Error during login:", error);
+      setServerErrors({ error: error.response.data.detail });
+    }
+  };
+
+  return (
+    <StyledLogin>
+      <CardWrapper title="Авторизация" padding="48px 32px">
+        <Form onFormSubmit={submit}>
+          <TextField
+            variant="outlined"
+            id="email"
+            label="Логин"
+            placeholder="email"
+            name="email"
+            onChange={onChange}
+            error={!!localErrors.email || !!serverErrors.email}
+            helperText={localErrors.email || serverErrors.email || ""}
+          />
+          <TextField
+            variant="outlined"
+            id="password"
+            label="Введите пароль"
+            placeholder="password"
+            type="password"
+            name="password"
+            onChange={onChange}
+            error={!!localErrors.password || !!serverErrors.error}
+            helperText={localErrors.password || serverErrors.error || ""}
+          />
+          <Button variant="contained" type="submit">
+            Войти
+          </Button>
+        </Form>
+      </CardWrapper>
+    </StyledLogin>
+  );
 };
 
 export default Login;
-
-

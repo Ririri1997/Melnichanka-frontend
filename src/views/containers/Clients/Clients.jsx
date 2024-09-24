@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import CardWrapper from "../../../components/CardWrapper/CardWrapper";
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer} from "react";
 import {
  Button,
  IconButton,
@@ -21,6 +21,8 @@ import axios from "axios";
 import { clientsReducer, INITIAL_STATE } from "./Clients.state";
 import EditModal from "../../../components/EditModal/EditModal";
 import StyledTableCell from "../../../style/settings.styles";
+import { PREFIX } from "../../../helpers/API";
+import { getAccessToken } from "../../../utils/authService";
 
 export const Clients = ({ onCompleteStep, onSelectRow }) => {
  const [
@@ -37,49 +39,93 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
   dispatch,
  ] = useReducer(clientsReducer, INITIAL_STATE);
  const navigate = useNavigate();
+ const accessToken = getAccessToken();
 
  useEffect(() => {
   const fetchData = async () => {
-   try {
-    const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
-     navigate("/login");
-     return;
+      navigate("/login");
+      return;
     }
 
-    const [clientsRes, citiesRes] = await Promise.all([
-     axios.get("http://145.239.84.6/api/v1/clients/", {
-      headers: {
-       Authorization: `Bearer ${accessToken}`,
-       "Content-Type": "application/json",
-      },
-     }),
-     axios.get("http://145.239.84.6/api/v1/logistics/city/", {
-      headers: {
-       Authorization: `Bearer ${accessToken}`,
-       "Content-Type": "application/json",
-      },
-     }),
-    ]);
+    try {
+      const [clientsRes, citiesRes] = await Promise.all([
+        axios.get(`${PREFIX}clients/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }),
+        axios.get(`${PREFIX}logistics/city/`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }),
+      ]);
 
-    const clients = clientsRes.data;
-    const citiesData = citiesRes.data.reduce((acc, city) => {
-     acc[city.id] = city.city;
-     return acc;
-    }, {});
-    dispatch({ type: "setClientsData", payload: clients });
-    dispatch({ type: "setCities", payload: citiesData });
-   } catch (error) {
-    console.error("Error fetching data:", error);
-    if (error.response && error.response.status === 401) {
-     navigate("/login");
+      const clients = clientsRes.data;
+      const citiesData = citiesRes.data.reduce((acc, city) => {
+        acc[city.id] = city.city;
+        return acc;
+      }, {});
+
+      dispatch({ type: "setClientsData", payload: clients });
+      dispatch({ type: "setCities", payload: citiesData });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      if (error.response && error.response.status === 401) {
+        navigate("/login");
+      }
+    } finally {
+      dispatch({ type: "setLoading", payload: false });
     }
-   } finally {
-    dispatch({ type: "setLoading", payload: false });
-   }
   };
+
   fetchData();
- }, [navigate]);
+}, [navigate, accessToken]);
+
+ // useEffect(() => {
+ //  const fetchData = async () => {
+ //   try {
+ //    if (!accessToken) {
+ //     navigate("/login");
+ //     return;
+ //    }
+
+ //    const [clientsRes, citiesRes] = await Promise.all([
+ //     axios.get(`${PREFIX}clients/`, {
+ //      headers: {
+ //       Authorization: `Bearer ${accessToken}`,
+ //       "Content-Type": "application/json",
+ //      },
+ //     }),
+ //     axios.get(`${PREFIX}logistics/city/`, {
+ //      headers: {
+ //       Authorization: `Bearer ${accessToken}`,
+ //       "Content-Type": "application/json",
+ //      },
+ //     }),
+ //    ]);
+
+ //    const clients = clientsRes.data;
+ //    const citiesData = citiesRes.data.reduce((acc, city) => {
+ //     acc[city.id] = city.city;
+ //     return acc;
+ //    }, {});
+ //    dispatch({ type: "setClientsData", payload: clients });
+ //    dispatch({ type: "setCities", payload: citiesData });
+ //   } catch (error) {
+ //    console.error("Error fetching data:", error);
+ //    if (error.response && error.response.status === 401) {
+ //     navigate("/login");
+ //    }
+ //   } finally {
+ //    dispatch({ type: "setLoading", payload: false });
+ //   }
+ //  };
+ //  fetchData();
+ // }, [navigate, accessToken]);
 
  // функция, которая меняет порядок сортировки
  const handleSort = (column) => {
@@ -105,12 +151,12 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
 
  const handleDeleteClick = async (itemId) => {
   try {
-   const accessToken = localStorage.getItem("access_token");
+   const accessToken = getAccessToken();
    if (!accessToken) {
     navigate("/login");
     return;
    }
-   await axios.delete(`http://145.239.84.6/api/v1/clients/delete/${itemId}/`, {
+   await axios.delete(`clients/delete/${itemId}/`, {
     headers: {
      Authorization: `Bearer ${accessToken}`,
      "Content-Type": "application/json",
@@ -163,7 +209,7 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
  const handleModalSave = async (newValues) => {
   try {
    // Выполняем запрос на изменение данных с помощью axios
-   const accessToken = localStorage.getItem("access_token");
+   const accessToken = getAccessToken();
    if (!accessToken) {
     navigate("/login");
     return;
@@ -171,7 +217,7 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
 
    if (selectedRow) {
     const response = await axios.patch(
-     `http://145.239.84.6/api/v1/clients/${selectedRow.id}/`,
+     `${PREFIX}clients/${selectedRow.id}/`,
      newValues,
      {
       headers: {
@@ -190,7 +236,7 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
    } else {
     // Иначе, если selectedRow равен null, значит, мы пытаемся создать новую компанию
     const response = await axios.post(
-     `http://145.239.84.6/api/v1/clients/`,
+     `${PREFIX}clients/`,
      newValues,
      {
       headers: {

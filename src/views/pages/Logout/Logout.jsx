@@ -1,35 +1,43 @@
-
-import {useEffect} from "react";
+import { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { PREFIX } from "../../../helpers/API";
 
 export const Logout = () => {
- let localStorageTokenRefresh = localStorage.getItem('refresh_token');
- const navigate = useNavigate();
+  const refreshToken = localStorage.getItem('refresh_token');
+  const navigate = useNavigate();
 
- console.log(localStorageTokenRefresh)
-    useEffect(() => {
-        (async () => {
-            try {
-                await axios.post('http://145.239.84.6/api/v1/users/logout/',{
-                refresh_token: localStorageTokenRefresh
-                } ,{headers: {
-                    'Content-Type': 'application/json',
-                    // добавила эту строку 
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-
-                }}, {withCredentials: true});
-
-                localStorage.clear();
-                axios.defaults.headers.common['Authorization'] = null;
-                navigate( '/login'); 
-            } catch (e) {
-                console.log('logout not working', e)
+  useEffect(() => {
+    (async () => {
+      try {
+        // Проверяем наличие рефреш-токена
+        if (refreshToken) {
+          await axios.post(
+            `${PREFIX}users/logout/`,
+            { refresh_token: refreshToken },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              withCredentials: true, // Переносим это сюда
             }
-        })();
-    }, [navigate, localStorageTokenRefresh]);
+          );
 
-    return (
-        <div></div>
-    )
-}
+          // Очищаем локальное хранилище после успешного логаута
+          localStorage.clear();
+          // Удаляем заголовок Authorization для всех будущих запросов
+          axios.defaults.headers.common['Authorization'] = null;
+
+          // Перенаправляем на страницу логина
+          navigate('/login');
+        } else {
+          console.error("Refresh token is missing.");
+        }
+      } catch (e) {
+        console.error("Logout not working:", e);
+      }
+    })();
+  }, [navigate, refreshToken]);
+
+  return <div></div>;
+};

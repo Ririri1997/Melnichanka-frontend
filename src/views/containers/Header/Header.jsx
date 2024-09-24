@@ -4,6 +4,8 @@ import {IconButton, Container, Grid} from '@mui/material';
 import { SpanBold } from '../../../style/settings.styles';
 import { useEffect, useState } from 'react';
 import axios from "axios";
+import { PREFIX } from '../../../helpers/API';
+
 
 function Header() {
   const [userName, setUserName] = useState('');
@@ -13,7 +15,7 @@ function Header() {
       try {
         const accessToken = localStorage.getItem('access_token');
 
-      const {data} = await axios.get('http://145.239.84.6/api/v1/users/edit/', {
+      const {data} = await axios.get(`${PREFIX}users/edit/`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'

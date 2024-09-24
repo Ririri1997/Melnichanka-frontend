@@ -1,5 +1,5 @@
 
-import React, { useReducer } from "react";
+import React, {useEffect, useReducer } from "react";
 import CardWrapper from "../../../components/CardWrapper/CardWrapper";
 import { Stepper, Step, StepButton } from "@mui/material";
 import Header from "../../containers/Header/Header";
@@ -21,12 +21,13 @@ export const Home = () => {
  const sendData = {
   "delivery_type": deliveryType,
   "client_id": selectedClients.id,
-  "items": [],
+  "items": selectedGoods,
     "factory_id": factoryId,
     "destination": inputFullAddress,
     "delivery_cost": deliveryCost
  }
 
+ 
  const steps = getSteps();
 
   const handleComplete = (step) => {
@@ -45,13 +46,11 @@ export const Home = () => {
   };
 
   const handleRowSelect = (row) => {
-    console.log("Selected row:", row);
     if (activeStep === 0) {
       dispatch({ type: "setSelectedClients", payload: row});
     }
     if (activeStep === 1) {
       dispatch({ type: "setSelectedGoods", payload: row});
-      console.log(row);
     }
   };
 

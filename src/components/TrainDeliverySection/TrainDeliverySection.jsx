@@ -42,8 +42,7 @@ const TrainDeliverySection = ({
      margin="dense"
      type="number"
      label="Стоимость доставки"
-     onChange={(e)=>{handleDeliveryCost(e.target.value)
-      console.log(e.target.value);
+     onChange={(e)=>{ handleDeliveryCost(e.target.value)
      }}
     />
    </Grid>
