@@ -1,4 +1,3 @@
-
 import React, {useEffect, useReducer } from "react";
 import CardWrapper from "../../../components/CardWrapper/CardWrapper";
 import { Stepper, Step, StepButton } from "@mui/material";
@@ -9,6 +8,7 @@ import { Delivery } from "../Delivery/Delivery";
 import { INITIAL_STATE, homeReducer } from "./Home.state";
 import Download from "../Download/Download";
 import { HomeContext } from "../../../context/Home.context";
+import { getAccessToken } from "../../../utils/authService";
 
 function getSteps() {
   return ["Компании", "Товары", "Способ доставки", "Скачивание"];
@@ -53,8 +53,8 @@ export const Home = () => {
       dispatch({ type: "setSelectedGoods", payload: row});
     }
   };
-
-
+  
+  
   return (
     <HomeContext.Provider value={{ state, dispatch }}>
       <Header />

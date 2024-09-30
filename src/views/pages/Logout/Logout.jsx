@@ -2,15 +2,15 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { PREFIX } from "../../../helpers/API";
+import { clearTokens, getRefreshToken } from "../../../utils/authService";
 
 export const Logout = () => {
-  const refreshToken = localStorage.getItem('refresh_token');
+  const refreshToken = getRefreshToken();
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
       try {
-        // Проверяем наличие рефреш-токена
         if (refreshToken) {
           await axios.post(
             `${PREFIX}users/logout/`,
@@ -19,16 +19,13 @@ export const Logout = () => {
               headers: {
                 'Content-Type': 'application/json',
               },
-              withCredentials: true, // Переносим это сюда
+              withCredentials: true, 
             }
           );
 
-          // Очищаем локальное хранилище после успешного логаута
-          localStorage.clear();
-          // Удаляем заголовок Authorization для всех будущих запросов
+          clearTokens();
           axios.defaults.headers.common['Authorization'] = null;
 
-          // Перенаправляем на страницу логина
           navigate('/login');
         } else {
           console.error("Refresh token is missing.");

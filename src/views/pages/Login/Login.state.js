@@ -2,16 +2,15 @@ import { handleEmailValid, handlePasswordValid } from "../../../utils/formValida
 
 export const INITIAL_STATE = {
  isValidText: {
-  email: "",
-  password: "",
+   email: false,
+   password: false,
  },
  values: {
-  email: "",
-  password: "",
+   email: "",
+   password: "",
  },
  isFormReadyToSubmit: false,
 };
-
 export function formReducer(state, action) {
  switch (action.type) {
   case "SET_VALUE":

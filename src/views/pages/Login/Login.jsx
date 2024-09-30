@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useReducer, useEffect } from "react";
 import StyledLogin from "./Login.styles";
 import CardWrapper from "../../../components/CardWrapper/CardWrapper";
@@ -7,9 +6,9 @@ import { TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formReducer, INITIAL_STATE } from "./Login.state";
-import { PREFIX } from "../../../helpers/API";
-
-
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../../../store/auth/authReducer";
+import { getAccessToken } from "../../../utils/authService";
 
 const Login = () => {
   const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);
@@ -18,6 +17,17 @@ const Login = () => {
   const [localErrors, setLocalErrors] = useState({});
   const navigate = useNavigate();
   const location = useLocation();
+
+  const dispatch = useDispatch();
+  const {jwt} = useSelector((s)=> s.user);
+  useEffect(()=>{
+   if(jwt){
+    navigate('/');
+    console.log(jwt);
+   }
+  }, [jwt, navigate]);
+
+
 
   useEffect(() => {
     dispatchForm({ type: "SUBMIT", values });
@@ -46,38 +56,22 @@ const Login = () => {
   };
 
   const submit = async (e) => {
-    e.preventDefault();
-
-    setLocalErrors({ email: isValidText.email, password: isValidText.password });
-
-    if (!isFormReadyToSubmit) {
-      console.log("Form is not ready to submit:", !isFormReadyToSubmit);
-      return;
-    }
-
-    try {
-      const { data } = await axios.post(
-        `${PREFIX}users/login/`,
-        values,
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
-
-      // Очищаем и сохраняем токены
-      localStorage.clear();
-      localStorage.setItem("access_token", data.access);
-      localStorage.setItem("refresh_token", data.refresh);
-
-      // Перенаправляем на предыдущую страницу
+   e.preventDefault();
+   setLocalErrors({ email: isValidText.email, password: isValidText.password });
+   if (!isFormReadyToSubmit) {
+     console.log("Form is not ready to submit:", !isFormReadyToSubmit);
+     return;
+   }
+   try {
+    const disp = await dispatch(login(values)); 
       navigate(fromPage, { replace: true });
     } catch (error) {
-      console.error("Error during login:", error);
-      setServerErrors({ error: error.response.data.detail });
-    }
-  };
+     console.error("Error during login:", error);
+     setServerErrors({ error: error.response?.data?.detail || 'Unknown error' });
+   }
+ };
 
+ 
   return (
     <StyledLogin>
       <CardWrapper title="Авторизация" padding="48px 32px">

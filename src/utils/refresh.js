@@ -28,7 +28,6 @@ axios.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 axios.interceptors.response.use(
  (response) => response,
  async (error) => {
@@ -44,19 +43,20 @@ axios.interceptors.response.use(
        if (refreshToken) {
          try {
            const { data } = await axios.post(
-              `${PREFIX}users/token/refresh`,
+             `${PREFIX}users/token/refresh/`,
              { refresh: refreshToken },
              { withCredentials: true }
            );
-           saveTokens(data.access, refreshToken);
-           console.log(data); // Сохранение новых токенов
+           saveTokens(data.access, data.refresh);
            originalRequest.headers["Authorization"] = `Bearer ${data.access}`;
-           processQueue(null, data.access); // Разрешение запросов из очереди
+           processQueue(null, data.access);
            return axios(originalRequest);
          } catch (refreshError) {
-           processQueue(refreshError, null); // Отклонение всех запросов в очереди
-           clearTokens(); // Очищаем токены при ошибке обновления
-           return Promise.reject(refreshError);
+          console.error('Error refreshing token:', refreshError.response ? refreshError.response.data : refreshError.message);
+          processQueue(refreshError, null);
+          clearTokens();
+          return Promise.reject(refreshError);
+          
          } finally {
            isRefreshing = false;
          }
@@ -64,7 +64,7 @@ axios.interceptors.response.use(
          clearTokens();
        }
      } else {
-       // Обрабатываем параллельные запросы
+       // Обработка параллельных запросов
        return new Promise((resolve, reject) => {
          failedQueue.push({ resolve, reject });
        })

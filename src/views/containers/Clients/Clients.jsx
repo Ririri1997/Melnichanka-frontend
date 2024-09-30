@@ -235,6 +235,7 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
     });
    } else {
     // Иначе, если selectedRow равен null, значит, мы пытаемся создать новую компанию
+    console.log(newValues);
     const response = await axios.post(
      `${PREFIX}clients/`,
      newValues,
