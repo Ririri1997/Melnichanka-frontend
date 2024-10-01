@@ -1,16 +1,15 @@
-import React, {useContext} from "react";
+import React from "react";
 import { Grid, FormControl, TextField } from "@mui/material";
 import SelectFactory from "../SelectFactory/SelectFactory";
-import { HomeContext } from "../../context/Home.context";
+import { useSelector } from "react-redux"; // Импортируем useSelector для доступа к состоянию
 
 const TrainDeliverySection = ({
  factories,
  handleFactoryChange,
  handleDeliveryCost
 }) => {
- 
- const { state: homeState} = useContext(HomeContext);
- const {selectedClients} = homeState;
+ const { selectedClients } = useSelector((state) => state.home);
+
  return (
   <Grid
    container

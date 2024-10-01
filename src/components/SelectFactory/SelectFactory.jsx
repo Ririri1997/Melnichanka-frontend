@@ -1,12 +1,12 @@
-import React, {useContext} from "react";
+import React from "react";
 import { Grid, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { useSelector } from "react-redux";
 
-import { HomeContext } from "../../context/Home.context";
 const SelectFactory = ({ handleFactoryChange, factories }) => {
 
 
- const { state: homeState } = useContext(HomeContext);
- const {factoryId} = homeState;
+ const { factoryId } = useSelector((state) => state.home);
+
 
  return (
   <Grid item width={"266px"} sx={{ marginTop: "8px" }}>

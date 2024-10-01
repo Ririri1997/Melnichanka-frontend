@@ -7,9 +7,12 @@ import { clientsReducer, INITIAL_STATE } from "./Goods.state";
 import { DataGrid } from "@mui/x-data-grid";
 import { PREFIX } from "../../../helpers/API";
 import { getAccessToken } from "../../../utils/authService";
+import { useSelector } from 'react-redux';
 
 
 export const Goods = ({ onCompleteStep, onSelectRow }) => {
+ const { selectedClients} = useSelector(state => state.home);
+console.log(selectedClients);
   const [state, dispatch] = useReducer(clientsReducer, INITIAL_STATE);
   const { goodsData, searchFlourName, searchBrand, selectedRows } = state;
 
@@ -22,7 +25,7 @@ export const Goods = ({ onCompleteStep, onSelectRow }) => {
     setFilteredGoodsData(goodsData); // При загрузке данных устанавливаем отфильтрованные данные
     
   }, [goodsData, selectedRows]);
-  console.log(goodsData); // Логирование selectedRows при обновлении goodsData
+  // console.log(goodsData); // Логирование selectedRows при обновлении goodsData
 
   const accessToken = getAccessToken();
   // Загрузка данных

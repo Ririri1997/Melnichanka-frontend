@@ -7,8 +7,7 @@ import Button from "@mui/material/Button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { formReducer, INITIAL_STATE } from "./Login.state";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../../../store/auth/authReducer";
-import { getAccessToken } from "../../../utils/authService";
+import { login } from "../../../store/slice/authReducer.slice.js";
 
 const Login = () => {
   const [formState, dispatchForm] = useReducer(formReducer, INITIAL_STATE);

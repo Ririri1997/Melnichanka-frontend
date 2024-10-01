@@ -1,62 +1,51 @@
-import React, {useEffect, useReducer } from "react";
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import CardWrapper from "../../../components/CardWrapper/CardWrapper";
 import { Stepper, Step, StepButton } from "@mui/material";
 import Header from "../../containers/Header/Header";
-import { Clients } from "../../containers/Clients/Clients";
-import { Goods } from "../Goods/Goods";
-import { Delivery } from "../Delivery/Delivery";
-import { INITIAL_STATE, homeReducer } from "./Home.state";
+import Clients from "../../containers/Clients/Clients";
+import Goods from "../Goods/Goods";
+import Delivery from "../Delivery/Delivery";
 import Download from "../Download/Download";
-import { HomeContext } from "../../../context/Home.context";
-import { getAccessToken } from "../../../utils/authService";
+import { homeActions } from "../../../store/slice/home.slice";
+
 
 function getSteps() {
   return ["Компании", "Товары", "Способ доставки", "Скачивание"];
 }
 
 export const Home = () => {
-  const [state, dispatch] = useReducer(homeReducer, INITIAL_STATE);
-  const { activeStep, completed, selectedGoods, selectedClients, deliveryInfo, deliveryCost, inputFullAddress, factoryId, deliveryType} = state;
-  const ids = selectedGoods.map(item => item.id);
- const sendData = {
-  "delivery_type": deliveryType,
-  "client_id": selectedClients.id,
-  "items": selectedGoods,
-    "factory_id": factoryId,
-    "destination": inputFullAddress,
-    "delivery_cost": deliveryCost
- }
+  const dispatch = useDispatch();
+  const { activeStep, completed, selectedGoods, selectedClients, deliveryInfo, deliveryCost } = useSelector(state => state.home);
 
- 
- const steps = getSteps();
-
+  const steps = getSteps();
+  console.log(selectedGoods);
   const handleComplete = (step) => {
     const newCompleted = [...completed];
     newCompleted[step] = true;
+    dispatch(homeActions.setCompleted(newCompleted));
 
-    dispatch({ type: "setCompleted", payload: newCompleted });
 
     if (step < steps.length - 1) {
-      dispatch({ type: "setActiveStep", payload: step + 1 });
+      dispatch(homeActions.setActiveStep(step + 1));
     }
   };
 
   const handleStep = (step) => {
-    dispatch({ type: "setActiveStep", payload: step });
+    dispatch(homeActions.setActiveStep(step));
   };
 
   const handleRowSelect = (row) => {
     if (activeStep === 0) {
-      dispatch({ type: "setSelectedClients", payload: row});
+      dispatch(homeActions.setSelectedClients(row));
     }
     if (activeStep === 1) {
-      dispatch({ type: "setSelectedGoods", payload: row});
+      dispatch(homeActions.setSelectedGoods(row));
     }
   };
-  
-  
+
   return (
-    <HomeContext.Provider value={{ state, dispatch }}>
+    <>
       <Header />
       <CardWrapper borderRadius="medium" width="medium" marginBottom="20px" padding="24px 28px">
         <Stepper nonLinear activeStep={activeStep} style={{ width: "100%" }}>
@@ -69,6 +58,7 @@ export const Home = () => {
           ))}
         </Stepper>
       </CardWrapper>
+
       {activeStep === 0 && (
         <Clients onCompleteStep={() => handleComplete(0)} onSelectRow={handleRowSelect} />
       )}
@@ -85,7 +75,7 @@ export const Home = () => {
           deliveryInfo={deliveryInfo}
         />
       )}
-    </HomeContext.Provider>
+    </>
   );
 };
 
