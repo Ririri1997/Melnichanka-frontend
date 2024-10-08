@@ -1,10 +1,12 @@
 import React from "react";
 import CardWrapper from "../../../components/CardWrapper/CardWrapper";
-
+import { useSelector } from "react-redux";
 // можно здесь все обернуть в useContext
 
 export const Download = () => {
 
+ const { factoryId, deliveryCost, inputFullAddress,  } = useSelector(state => state.delivery);
+ console.log();
  return (
   <CardWrapper
    borderRadius="medium"
@@ -13,7 +15,10 @@ export const Download = () => {
    justify="start"
    gap="0px"
   >
-  Download
+  Download 
+  Price:  {deliveryCost}, 
+  Factory: {factoryId},
+  Full Adress: {inputFullAddress.value}
   </CardWrapper>
  );
 };

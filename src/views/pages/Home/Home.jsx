@@ -16,10 +16,9 @@ function getSteps() {
 
 export const Home = () => {
   const dispatch = useDispatch();
-  const { activeStep, completed, selectedGoods, selectedClients, deliveryInfo, deliveryCost } = useSelector(state => state.home);
+  const { activeStep, completed } = useSelector(state => state.home);
 
   const steps = getSteps();
-  console.log(selectedGoods);
   const handleComplete = (step) => {
     const newCompleted = [...completed];
     newCompleted[step] = true;
@@ -35,14 +34,11 @@ export const Home = () => {
     dispatch(homeActions.setActiveStep(step));
   };
 
-  const handleRowSelect = (row) => {
-    if (activeStep === 0) {
-      dispatch(homeActions.setSelectedClients(row));
-    }
-    if (activeStep === 1) {
-      dispatch(homeActions.setSelectedGoods(row));
-    }
-  };
+  // сделать loading для всех и зафигачить скилеты 
+  // Чистить параметры поиска после выбора товаров и Компании
+  // выбранные компании должны быть помечены галочкой при возвращении назад 
+  // не пускать дальше при не выбранном степпера 
+  // корректировать компанию и добавлять компанию.  нас появились новые условия, кот их погрызи
 
   return (
     <>
@@ -60,20 +56,17 @@ export const Home = () => {
       </CardWrapper>
 
       {activeStep === 0 && (
-        <Clients onCompleteStep={() => handleComplete(0)} onSelectRow={handleRowSelect} />
+        <Clients onCompleteStep={() => handleComplete(0)} />
       )}
       {activeStep === 1 && (
-        <Goods onCompleteStep={() => handleComplete(1)} onSelectRow={handleRowSelect} />
+        <Goods onCompleteStep={() => handleComplete(1)} />
       )}
       {activeStep === 2 && (
         <Delivery onCompleteStep={() => handleComplete(2)} />
       )}
+
       {activeStep === 3 && (
-        <Download
-          selectedGoods={selectedGoods}
-          selectedClients={selectedClients}
-          deliveryInfo={deliveryInfo}
-        />
+        <Download/>
       )}
     </>
   );

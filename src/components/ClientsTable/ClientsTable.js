@@ -19,18 +19,14 @@ import axios from "axios";
 
 const ClientTable = ({
   clientsData,
-  cities,
   sortDirection,
   activeColumn,
-  onCompleteStep,
-  onSelectRow,
+  onCompleteStep
 }) => {
-  const { searchCriteria } = useSelector((state) => state.clients); // Получаем поисковые критерии из стейта
+  const { searchCriteria } = useSelector((state) => state.clients);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Функция для отображения названия города
-  const renderCityName = (cityId) => cities[cityId] || "";
 
   // Сортируем данные клиентов
   const sortedClientsData = [...clientsData].sort((a, b) => {
@@ -45,15 +41,17 @@ const ClientTable = ({
     }
   });
 
-  // Фильтрация данных на основе поисковых критериев
+  // Фильтрация данных на основе одного или двух поисковых критериев
   const filteredClientsData = sortedClientsData.filter((item) => {
-    const clientNameMatches = item.client_name
-      .toLowerCase()
-      .includes(searchCriteria.name.toLowerCase());
-    const cityNameMatches = renderCityName(item.destination_city)
-      .toLowerCase()
-      .includes(searchCriteria.city.toLowerCase());
-    return clientNameMatches && cityNameMatches;
+    const clientNameMatches = searchCriteria.name
+      ? item.client_name.toLowerCase().includes(searchCriteria.name.toLowerCase())
+      : true; // Если нет критериев для названия, показываем все
+    
+    const cityNameMatches = searchCriteria.city
+      ? item.destination_city.toLowerCase().includes(searchCriteria.city.toLowerCase())
+      : true; // Если нет критериев для города, показываем все
+
+    return clientNameMatches && cityNameMatches; // Возвращаем совпадения для любого критерия
   });
 
   // Логика сортировки
@@ -102,7 +100,6 @@ const ClientTable = ({
 
   // Обработчик клика по строке таблицы
   const handleTableRowClick = (row) => {
-    onSelectRow(row);
     dispatch(clientsActions.setSelectedRow(row)); // Устанавливаем выбранную строку
     onCompleteStep();
   };

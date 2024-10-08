@@ -8,7 +8,7 @@ const TrainDeliverySection = ({
  handleFactoryChange,
  handleDeliveryCost
 }) => {
- const { selectedClients } = useSelector((state) => state.home);
+ const { selectedRow } = useSelector((state) => state.clients);
 
  return (
   <Grid
@@ -25,7 +25,7 @@ const TrainDeliverySection = ({
    <Grid item width={"266px"}>
     <FormControl variant="outlined" fullWidth>
      <TextField
-      value={selectedClients.railway_station}
+      value={selectedRow.railway_station}
       fullWidth
       margin="dense"
       label="Станция получения"

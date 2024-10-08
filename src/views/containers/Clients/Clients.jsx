@@ -11,9 +11,9 @@ import { PREFIX } from "../../../helpers/API";
 import { getAccessToken } from "../../../utils/authService";
 import axios from "axios";
 
-export const Clients = ({ onCompleteStep, onSelectRow }) => {
+export const Clients = ({ onCompleteStep }) => {
   const dispatch = useDispatch();
-  const { clientsData, sortDirection, activeColumn, loading, cities, selectedRow, isModalOpen, searchCriteria } = useSelector(state => state.clients);
+  const { clientsData, searchCriteria, sortDirection, activeColumn, cities, selectedRow, isModalOpen } = useSelector(state => state.clients);
   const navigate = useNavigate();
   const accessToken = getAccessToken();
 
@@ -38,6 +38,7 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
     };
     fetchData();
   }, [navigate, accessToken, dispatch]);
+
   // Обработчик сортировки
   const handleSortChange = (column, direction) => {
     dispatch(clientsActions.setSortDirection(direction)); // Установка нового направления сортировки
@@ -71,13 +72,22 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
       console.error("Error saving data:", error);
     }
   };
-
+  // Search fields for clients
+  const searchFields = [
+   { name: "name", label: "Название" },
+   { name: "city", label: "Город" },
+ ];
   return (
     <CardWrapper borderRadius="medium" width="medium" padding="32px 28px">
       <Grid container justifyContent="space-between" alignItems="center">
        
       <Grid item>
-      <SearchForm searchCriteria={searchCriteria} /></Grid>
+      <SearchForm
+            searchFields={searchFields}
+            searchCriteria={searchCriteria}
+            setSearchCriteria={(criteria) => dispatch(clientsActions.setSearchCriteria(criteria))}
+          />
+          </Grid>
         
       <Grid item>
         <Button
@@ -93,12 +103,9 @@ export const Clients = ({ onCompleteStep, onSelectRow }) => {
       <TableContainer>
         <ClientTable
           clientsData={clientsData}
-          cities={cities}
           sortDirection={sortDirection}
           activeColumn={activeColumn}
           onSortChange={handleSortChange}  // Передаем функцию сортировки
-
-          onSelectRow={onSelectRow}
           onCompleteStep = {onCompleteStep}
         />
       </TableContainer>

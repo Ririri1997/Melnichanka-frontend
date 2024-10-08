@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from "react"; 
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import CardWrapper from "../../../components/CardWrapper/CardWrapper";
@@ -8,19 +8,17 @@ import DeliveryTypeSection from "../../../components/DeliveryTypeSection/Deliver
 import SelfDeliverySection from "../../../components/SelfDeliverySection/SelfDeliverySection";
 import AutoDeliverySection from "../../../components/AutoDeliverySection/AutoDeliverySection";
 import TrainDeliverySection from "../../../components/TrainDeliverySection/TrainDeliverySection";
-import { fetchFactories, setIsFormReadyToSubmit } from "../../../store/slice/delivery.slice";
-import { setFactoryId, setDeliveryCost, setInputAddress, setDeliveryType } from "../../../store/slice/home.slice";
+
 import "./Delivery.css";
+import { fetchFactories, deliveryActions } from "../../../store/slice/delivery.slice"; // Исправлен импорт
 
 export const Delivery = ({ onCompleteStep }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const { factories, isFormReadyToSubmit, loading, error } = useSelector(state => state.delivery);
-  const { deliveryType, factoryId, deliveryCost, inputAddress, inputFullAddress } = useSelector(state => state.home);
+  const { deliveryType, factoryId, deliveryCost, inputAddress, inputFullAddress, factories, isFormReadyToSubmit, loading, error } = useSelector(state => state.delivery);
 
   useEffect(() => {
-    dispatch(fetchFactories());
+    dispatch(fetchFactories()); // Исправлен вызов асинхронного экшена
   }, [dispatch]);
 
   useEffect(() => {
@@ -29,26 +27,22 @@ export const Delivery = ({ onCompleteStep }) => {
     const isTainDeliveryReady = deliveryType !== "self" && factoryId && deliveryCost;
 
     if (isSelfDeliveryReady || isTainDeliveryReady || isAutoDeliveryReady) {
-      dispatch(setIsFormReadyToSubmit(true));
+      dispatch(deliveryActions.setIsFormReadyToSubmit(true));
     } else {
-      dispatch(setIsFormReadyToSubmit(false));
+      dispatch(deliveryActions.setIsFormReadyToSubmit(false));
     }
   }, [factoryId, deliveryType, deliveryCost, inputFullAddress, dispatch]);
 
-  const handleDeliveryChange = (event) => {
-    dispatch(setDeliveryType(event.target.value));
-  };
-
   const handleFactoryChange = (value) => {
-    dispatch(setFactoryId(value));
+    dispatch(deliveryActions.setFactoryId(value));
   };
 
   const handleSelect = (suggestion) => {
-    dispatch(setInputAddress(suggestion));
+    dispatch(deliveryActions.setInputAddress(suggestion));
   };
 
   const handleDeliveryCost = (cost) => {
-    dispatch(setDeliveryCost(cost));
+    dispatch(deliveryActions.setDeliveryCost(cost));
   };
 
   const handleCompleteStep = () => {
@@ -71,10 +65,7 @@ export const Delivery = ({ onCompleteStep }) => {
       justify="start"
       gap="0px"
     >
-      <DeliveryTypeSection
-        deliveryType={deliveryType}
-        handleDeliveryChange={handleDeliveryChange}
-      />
+      <DeliveryTypeSection/>
       {deliveryType === "self" && (
         <SelfDeliverySection
           factories={factories}
